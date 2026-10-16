@@ -202,6 +202,21 @@ th,td{border-bottom:2px dashed var(--grid);padding:6px 4px;text-align:left}
 .gain{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:300;background:var(--pencil);color:#3a2a00;border:3px solid #3a2a00;border-radius:30px;padding:6px 18px;font:800 1.3rem var(--font-display);animation:floatUp 1s ease-out forwards;pointer-events:none}
 @keyframes floatUp{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-70px)}}
 .toast{position:fixed;left:50%;top:80px;transform:translateX(-50%);z-index:300;background:var(--ink);color:var(--card);border-radius:var(--r-m);padding:10px 18px;font:800 1rem var(--font-display);max-width:90%;text-align:center;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+/* ===== Bắt đầu / nhạc / quà ===== */
+.start-card{text-align:center;padding:14px 6px}
+.start-emoji{font-size:3.6rem;line-height:1.1}
+.start-card h3{font:800 1.4rem var(--font-display);margin:6px 0}
+.start-card p{color:var(--ink-soft);margin-bottom:12px}
+.chk{display:inline-flex;align-items:center;gap:8px;margin-bottom:16px;font-weight:800;cursor:pointer}
+.chk input{width:22px;height:22px;accent-color:var(--red)}
+.note.warn{background:#fff3cd;color:#7a5200;border-radius:12px;padding:8px 12px;margin:14px 0 0;text-align:left}
+.song-no{width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--card);display:grid;place-items:center;font:800 1rem var(--font-display);flex:none}
+.song-play{margin-left:auto;font-size:1.3rem}
+.vol{display:flex;align-items:center;gap:10px;margin:10px 0 14px}
+.vol input{flex:1;accent-color:var(--red)}
+.newtag{background:var(--pencil);color:#3a2a00;border-radius:8px;padding:0 6px;font-size:.75rem;font-style:normal;font-weight:800}
+.add-box{border:2px dashed var(--line);border-radius:var(--r-m);padding:10px}
+.add-box .btn{margin-top:8px;width:100%}
 @media (prefers-reduced-motion: reduce){.shake,.stamp,.gain,.balloon.popped{animation-duration:.01ms!important}}
 
 /* ===== Giao diện (skin) ===== */
@@ -309,6 +324,7 @@ th,td{border-bottom:2px dashed var(--grid);padding:6px 4px;text-align:left}
     <button class="me" onclick="openAvatar()" aria-label="Đổi tên và ảnh"><span class="av" id="hAv">🧒</span><span id="hName">Bé</span></button>
     <div class="stars" aria-label="Số sao">⭐ <span id="stars">0</span></div>
     <button class="ico wide" onclick="openSkin()" aria-label="Đổi giao diện">🎨 Giao diện</button>
+    <button class="ico" onclick="openMusic()" aria-label="Nhạc nền">🎵</button>
     <button class="ico" id="muteBtn" onclick="toggleMute()" aria-label="Bật tắt âm thanh">🔊</button>
     <button class="ico" onclick="view('shop')" aria-label="Cửa hàng">🛒</button>
     <button class="ico" onclick="view('vault')" aria-label="Tủ quà">🎁</button>
@@ -380,14 +396,26 @@ th,td{border-bottom:2px dashed var(--grid);padding:6px 4px;text-align:left}
   <table><thead><tr><th>Môn</th><th>Đúng</th><th>Sai</th></tr></thead><tbody id="statRows"></tbody></table>
   <h3 style="font-size:1.05rem">🎁 Danh sách quà</h3>
   <div id="shopEdit"></div>
-  <div class="field" style="margin-top:10px"><label>Thêm quà mới</label>
+  <div class="field add-box" style="margin-top:10px"><label>Thêm phần thưởng mới</label>
     <input id="niTitle" placeholder="Tên món quà" style="margin-bottom:6px">
     <div style="display:flex;gap:6px"><input id="niPrice" type="number" min="1" placeholder="Số sao cần"><input id="niIcon" maxlength="2" placeholder="Biểu tượng 🎁" style="max-width:130px"></div>
+    <button class="btn" onclick="addDraftItem()">➕ Thêm phần thưởng</button>
   </div>
+  <p class="note" id="draftNote" style="margin:6px 0 0"></p>
   <div class="row" style="justify-content:space-between">
     <button class="btn danger" onclick="askReset()">Xóa dữ liệu</button>
-    <span style="display:flex;gap:8px"><button class="btn" onclick="closeModal('parentSettings')">Đóng</button><button class="btn primary" onclick="saveParent()">Lưu</button></span>
+    <span style="display:flex;gap:8px"><button class="btn" onclick="closeModal('parentSettings')">Hủy</button><button class="btn primary" onclick="saveParent()">💾 Lưu tất cả</button></span>
   </div>
+</div></div>
+
+<!-- Nhạc nền -->
+<div id="musicModal" class="modal-bg hidden"><div class="modal">
+  <h3>🎵 Nhạc nền</h3>
+  <p style="color:var(--ink-soft);margin-bottom:10px">Chọn 1 trong 10 bài. Nhạc tự chạy khi bé chạm vào màn hình lần đầu (trình duyệt không cho phát tiếng khi chưa có thao tác nào).</p>
+  <button class="btn primary" id="musicToggle" onclick="toggleMusic()">⏸ Tắt nhạc nền</button>
+  <div class="vol"><span>🔈</span><input id="musicVol" type="range" min="0" max="100" value="50" oninput="setMusicVol(this.value)" aria-label="Âm lượng nhạc"><span>🔊</span></div>
+  <div id="songList"></div>
+  <div class="row"><button class="btn primary" onclick="closeModal('musicModal')">Xong</button></div>
 </div></div>
 
 <!-- Chọn giao diện -->
@@ -422,7 +450,7 @@ const DEFAULT_SHOP = [
   {id:5,title:'Đồ chơi Lego',price:100,icon:'🧩'}
 ];
 const AVATARS = ['🧒','👧','👦','🐱','🐶','🐰','🦊','🐼','🐯','🦁','🐸','🦄'];
-let user = {stars:0,name:'Bé',avatarImg:null,avatarEmoji:'🧒',vault:[],mute:false,skin:'notebook',stats:{}};
+let user = {stars:0,name:'Bé',avatarImg:null,avatarEmoji:'🧒',vault:[],mute:false,skin:'notebook',music:{on:true,song:'aucl',vol:.5},readOpts:true,stats:{}};
 let config = {starsPerCorrect:10};
 let shop = DEFAULT_SHOP.slice();
 let seenMap = {};
@@ -437,6 +465,9 @@ function load(){
   SUBJ.forEach(s=>{ user.stats[s]=user.stats[s]||{c:0,w:0}; });
   if(!Array.isArray(user.vault)) user.vault=[];
   if(!SKINS[user.skin]) user.skin='notebook';
+  user.music=Object.assign({on:true,song:'aucl',vol:.5},user.music||{});
+  if(typeof user.readOpts!=='boolean') user.readOpts=true;
+  if(!SONGS.some(x=>x.id===user.music.song)) user.music.song=SONGS[0].id;
 }
 function save(){
   try{
@@ -460,40 +491,219 @@ function refresh(){
    ÂM THANH & GIỌNG ĐỌC
    ===================================================================== */
 let ac=null;
+function ensureAC(){ ac=ac||new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==='suspended') ac.resume(); return ac; }
 function tone(f,d,type,when,vol){
   if(user.mute) return;
   try{
-    ac=ac||new (window.AudioContext||window.webkitAudioContext)();
-    if(ac.state==='suspended') ac.resume();
+    ensureAC();
     const o=ac.createOscillator(), g=ac.createGain(), t0=ac.currentTime+(when||0), v=vol||.14;
     o.type=type||'sine'; o.frequency.value=f;
     g.gain.setValueAtTime(v,t0); g.gain.exponentialRampToValueAtTime(.001,t0+d);
     o.connect(g); g.connect(ac.destination); o.start(t0); o.stop(t0+d+.03);
   }catch(e){}
 }
+/* Âm thanh thao tác: chạm nút, chọn Đúng, chọn Sai */
 const sfx = {
-  ok(){ tone(660,.12,'triangle'); tone(880,.18,'triangle',.1); },
-  bad(){ tone(180,.3,'sawtooth',0,.07); },
+  click(){ tone(1100,.035,'square',0,.025); },
+  ok(){ tone(523,.12,'triangle',0,.16); tone(659,.12,'triangle',.09,.16); tone(784,.26,'triangle',.18,.16); },
+  bad(){ tone(240,.16,'sawtooth',0,.09); tone(170,.32,'sawtooth',.15,.09); },
   win(){ [523,659,784,1047].forEach((f,i)=>tone(f,.22,'triangle',i*.12)); },
-  pop(){ tone(420,.07,'square',0,.05); }
+  pop(){ tone(520,.08,'sine',0,.07); tone(780,.06,'sine',.04,.05); }
 };
-function speak(text,lang,force){
+
+/* =====================================================================
+   NHẠC NỀN — 10 bài do máy tự chơi (không cần tải file nhạc)
+   ===================================================================== */
+const SONGS=[
+ {id:'aucl',name:'Dưới ánh trăng (Au Clair de la Lune)',desc:'Hộp nhạc, dịu dàng như bài ru',bpm:88,tm:'box',n:'C4:1 C4:1 C4:1 D4:1 E4:2 D4:2 C4:1 E4:1 D4:1 D4:1 C4:4 R:1 C4:1 C4:1 C4:1 D4:1 E4:2 D4:2 C4:1 E4:1 D4:1 D4:1 C4:4'},
+ {id:'yankee',name:'Chú Yankee (Yankee Doodle)',desc:'Tiếng sáo, vui nhộn, nhịp hành khúc',bpm:116,tm:'flute',n:'C4:1 C4:1 D4:1 E4:1 C4:1 E4:1 D4:1 G3:1 C4:1 C4:1 D4:1 E4:1 C4:2 B3:2 C4:1 C4:1 D4:1 E4:1 F4:1 E4:1 D4:1 C4:1 B3:1 G3:1 A3:1 B3:1 C4:2 C4:2'},
+ {id:'lightly',name:'Chèo thuyền nhẹ (Lightly Row)',desc:'Đàn hạc, êm ả như mặt hồ',bpm:104,tm:'harp',n:'G4:1 E4:1 E4:2 F4:1 D4:1 D4:2 C4:1 D4:1 E4:1 F4:1 G4:1 G4:1 G4:2 G4:1 E4:1 E4:1 E4:1 F4:1 D4:1 D4:1 D4:1 C4:1 E4:1 G4:1 G4:1 C4:4'},
+ {id:'frog',name:'Tiếng ếch kêu (Frog Round)',desc:'Piano, ngộ nghĩnh và vui tai',bpm:120,tm:'piano',n:'C4:1 D4:1 E4:1 F4:1 E4:1 D4:1 C4:2 E4:1 F4:1 G4:1 A4:1 G4:1 F4:1 E4:2 C4:1 C4:1 C4:1 C4:1 C4:.5 C4:.5 D4:.5 D4:.5 E4:.5 E4:.5 F4:.5 F4:.5 E4:1 D4:1 C4:2'},
+ {id:'canon',name:'Canon (Pachelbel)',desc:'Chuông ngân chậm rãi, thư giãn',bpm:80,tm:'bell',n:'F#5:2 E5:2 D5:2 C#5:2 B4:2 A4:2 B4:2 C#5:2 D5:2 C#5:2 B4:2 A4:2 G4:2 F#4:2 G4:2 A4:2'},
+ {id:'minuet',name:'Minuet in G (Petzold)',desc:'Piano, thanh lịch, nhịp valse',bpm:120,tm:'piano',n:'D5:1 G4:.5 A4:.5 B4:.5 C5:.5 D5:1 G4:1 G4:1 E5:1 C5:.5 D5:.5 E5:.5 F#5:.5 G5:1 G4:1 G4:1 C5:1 D5:.5 C5:.5 B4:.5 A4:.5 B4:1 C5:.5 B4:.5 A4:.5 G4:.5 F#4:1 G4:.5 A4:.5 B4:.5 G4:.5 B4:3'},
+ {id:'kleine',name:'Eine kleine Nachtmusik (Mozart)',desc:'Piano, tươi sáng như buổi sớm',bpm:120,tm:'piano',n:'G4:1 R:.5 D4:.5 G4:1 R:.5 D4:.5 G4:.5 D4:.5 G4:.5 B4:.5 D5:2 C5:1 R:.5 A4:.5 C5:1 R:.5 A4:.5 C5:.5 A4:.5 F#4:.5 A4:.5 D4:2'},
+ {id:'turkish',name:'Hành khúc Thổ Nhĩ Kỳ (Mozart)',desc:'Piano, sôi động, nhanh nhẹn',bpm:132,tm:'piano',n:'B4:.5 A4:.5 G#4:.5 A4:.5 C5:2 D5:.5 C5:.5 B4:.5 C5:.5 E5:2 F5:.5 E5:.5 D#5:.5 E5:.5 B5:.5 A5:.5 G#5:.5 A5:.5 B5:.5 A5:.5 G#5:.5 A5:.5 C6:2 R:1'},
+ {id:'jingle',name:'Chuông ngân vang (Jingle Bells)',desc:'Chuông nhỏ, rộn ràng vui tươi',bpm:116,tm:'bell',n:'E4:1 E4:1 E4:2 E4:1 E4:1 E4:2 E4:1 G4:1 C4:1.5 D4:.5 E4:4 F4:1 F4:1 F4:1.5 F4:.5 F4:1 E4:1 E4:1 E4:.5 E4:.5 E4:1 D4:1 D4:1 E4:1 D4:2 G4:2'},
+ {id:'spider',name:'Nhện con (Itsy Bitsy Spider)',desc:'Tiếng sáo, ngộ nghĩnh, dễ nhớ',bpm:108,tm:'flute',n:'G3:.5 C4:1 C4:.5 C4:1 D4:.5 E4:1.5 E4:.5 E4:1 D4:.5 C4:1 D4:.5 E4:1 C4:2 R:1 G3:.5 C4:1 C4:.5 C4:1 D4:.5 E4:1.5 E4:.5 E4:1 D4:.5 C4:1 D4:.5 E4:1 C4:2 R:1'}
+];
+function noteFreq(n){
+  const m=/^([A-G])(#|b)?(\d)$/.exec(n); if(!m) return 0;
+  const base={C:0,D:2,E:4,F:5,G:7,A:9,B:11}[m[1]]+(m[2]==='#'?1:m[2]==='b'?-1:0);
+  return 440*Math.pow(2,(12*(parseInt(m[3],10)+1)+base-69)/12);
+}
+function parseSong(str){ return str.trim().split(/\s+/).map(t=>{ const p=t.split(':'); return {f:p[0]==='R'?0:noteFreq(p[0]),b:parseFloat(p[1])}; }); }
+const mus={playing:false,gain:null,timer:null,seq:[],i:0,t:0,beat:.6,tm:'box',duck:false};
+function musicVol(){ return (user.music.vol||0)*.55*(mus.duck?.22:1); }
+function musicLevel(){ try{ if(mus.gain&&ac) mus.gain.gain.setTargetAtTime(musicVol(),ac.currentTime,.15); }catch(e){} }
+function duck(on){ mus.duck=!!on; musicLevel(); }
+function playNote(f,t,dur,tm){
+  const g=ac.createGain(); g.connect(mus.gain);
+  const mkOsc=(type,fr,vol)=>{ const o=ac.createOscillator(), og=ac.createGain(); o.type=type; o.frequency.value=fr; og.gain.value=vol; o.connect(og); og.connect(g); return o; };
+  let atk=.01, dec=Math.min(dur*1.5,1.2), peak=.5, oscs=[];
+  if(tm==='box'){ oscs=[mkOsc('sine',f,1),mkOsc('sine',f*2,.25)]; dec=Math.min(dur*1.8,1.4); atk=.004; }
+  else if(tm==='piano'){ oscs=[mkOsc('triangle',f,1),mkOsc('sine',f*2,.2)]; dec=Math.min(dur*1.3,1.0); }
+  else if(tm==='flute'){ oscs=[mkOsc('sine',f,1),mkOsc('sine',f*2,.08)]; atk=.07; dec=dur*.98; peak=.42; }
+  else if(tm==='bell'){ oscs=[mkOsc('sine',f,1),mkOsc('sine',f*2.76,.22)]; atk=.004; dec=Math.min(dur*2.2,1.8); peak=.42; }
+  else { oscs=[mkOsc('triangle',f,1)]; atk=.004; dec=Math.min(dur*1.1,.8); }
+  g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(peak,t+atk); g.gain.exponentialRampToValueAtTime(.001,t+atk+dec);
+  oscs.forEach(o=>{ o.start(t); o.stop(t+atk+dec+.05); });
+}
+function musicTick(){
   try{
-    if((user.mute&&!force)||!('speechSynthesis' in window)) return;
-    speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance(text); u.lang=lang; u.rate=.85; speechSynthesis.speak(u);
+    while(mus.t<ac.currentTime+.8){
+      const n=mus.seq[mus.i], dur=n.b*mus.beat;
+      if(n.f) playNote(n.f,mus.t,dur,mus.tm);
+      mus.t+=dur; mus.i++;
+      if(mus.i>=mus.seq.length){ mus.i=0; mus.t+=mus.beat*2; }
+    }
   }catch(e){}
 }
-function speakQ(){
-  const q=G.q; if(!q) return;
-  let t=(q.sub?q.sub+'. ':'')+q.q;
-  const english = subject==='english' && /^[\x00-\x7F\s]+$/.test(q.q);
-  if(english) t=q.q;
-  t=t.replace(/\+/g,' cộng ').replace(/×/g,' nhân ').replace(/−/g,' trừ ').replace(/ : /g,' chia ').replace(/=/g,' bằng ').replace(/▢/g,' ô trống ')
-     .replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\uFE0F]/gu,' ').replace(/_/g,' ').replace(/\s+/g,' ');
-  speak(t, english?'en-US':'vi-VN');
+function musicStart(){
+  if(user.mute||!user.music.on||mus.playing) return;
+  try{ ensureAC(); }catch(e){ return; }
+  const s=SONGS.find(x=>x.id===user.music.song)||SONGS[0];
+  mus.seq=parseSong(s.n); mus.beat=60/s.bpm; mus.i=0; mus.t=ac.currentTime+.15; mus.tm=s.tm; mus.playing=true;
+  mus.gain=ac.createGain(); mus.gain.gain.value=0; mus.gain.connect(ac.destination);
+  mus.gain.gain.linearRampToValueAtTime(musicVol(),ac.currentTime+1.2);
+  musicTick(); mus.timer=setInterval(musicTick,200);
 }
-function toggleMute(){ user.mute=!user.mute; save(); }
+function musicStop(){
+  clearInterval(mus.timer); mus.playing=false;
+  if(mus.gain&&ac){ const g=mus.gain; try{ g.gain.cancelScheduledValues(ac.currentTime); g.gain.setTargetAtTime(0,ac.currentTime,.1); }catch(e){} setTimeout(()=>{ try{ g.disconnect(); }catch(e){} },700); }
+  mus.gain=null;
+}
+function musicRestart(){ musicStop(); musicStart(); }
+function openMusic(){ drawMusic(); openModal('musicModal'); }
+function drawMusic(){
+  const box=$('songList'); box.innerHTML='';
+  SONGS.forEach((sg,i)=>{
+    const on=user.music.song===sg.id&&user.music.on, b=document.createElement('button');
+    b.className='skin-card'+(on?' on':'');
+    b.innerHTML=`<div class="song-no">${i+1}</div><div><strong>${esc(sg.name)}</strong><small>${esc(sg.desc)}</small></div><span class="song-play">${on?'🔊':'▶'}</span>`;
+    b.onclick=()=>chooseSong(sg.id); box.appendChild(b);
+  });
+  $('musicToggle').textContent=user.music.on?'⏸ Tắt nhạc nền':'▶ Bật nhạc nền';
+  $('musicVol').value=Math.round(user.music.vol*100);
+}
+function chooseSong(id){ user.music.song=id; user.music.on=true; save(); musicRestart(); drawMusic(); }
+function toggleMusic(){ user.music.on=!user.music.on; save(); if(user.music.on) musicRestart(); else musicStop(); drawMusic(); }
+function setMusicVol(v){ user.music.vol=Math.max(0,Math.min(1,v/100)); save(); musicLevel(); }
+
+/* =====================================================================
+   GIỌNG ĐỌC — đọc đúng tiếng Việt: số, phép tính, đơn vị, tên chữ cái...
+   ===================================================================== */
+const EMO_NAME={'🍎':'quả táo','🍬':'cái kẹo','🎈':'quả bóng bay','🍪':'cái bánh quy','🐟':'con cá','🌸':'bông hoa','⭐':'ngôi sao','🚗':'chiếc xe','🍓':'quả dâu','🧸':'con gấu bông'};
+const SIGN_SAY={'<':'dấu bé hơn','>':'dấu lớn hơn','=':'dấu bằng'};
+const PUNCT_SAY={'?':'dấu chấm hỏi','.':'dấu chấm','!':'dấu chấm than',',':'dấu phẩy'};
+const PHON={g:'gờ',gh:'gờ kép',ng:'ngờ',ngh:'ngờ kép',c:'cờ',k:'ca',qu:'quờ',ch:'chờ',tr:'trờ',s:'sờ',x:'xờ',d:'dờ',gi:'di',r:'rờ',l:'lờ',n:'nờ'};
+const ALPHA={a:'a',b:'bê',c:'xê',d:'dê','đ':'đê',e:'e',g:'giê',h:'hát',i:'i',k:'ca',l:'e-lờ',m:'em-mờ',n:'en-nờ',o:'o',p:'pê',q:'cu',r:'e-rờ',s:'ét-sì',t:'tê',u:'u',v:'vê',x:'ích-xì',y:'i dài',th:'tê hát'};
+function viSay(t,isMath){
+  t=String(t).replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\uFE0F]/gu,m=>EMO_NAME[m]?' '+EMO_NAME[m]+' ':' ');
+  t=t.replace(/_{2,}/g,' , chỗ trống , ').replace(/(\d+)\s*\/\s*(\d+)/g,(m,a,b)=>' '+vnNum(+a)+' phần '+vnNum(+b)+' ')
+     .replace(/=\s*\?/g,' bằng bao nhiêu ').replace(/[“”"]/g,' ');
+  t=isMath?t.replace(/\(/g,' mở ngoặc ').replace(/\)/g,' đóng ngoặc '):t.replace(/[()]/g,' , ');
+  const OPS={'+':'cộng','×':'nhân','−':'trừ','-':'trừ','=':'bằng','▢':'ô trống',':':'chia'};
+  const UN={cm:'xăng-ti-mét',dm:'đề-xi-mét',km:'ki-lô-mét',mm:'mi-li-mét',kg:'ki-lô-gam',m:'mét',g:'gam',x:'ích'};
+  return t.split(/(\s+)/).map(tok=>{
+    if(!tok.trim()) return tok;
+    if(isMath&&OPS[tok]) return OPS[tok];
+    const mm=/^(.*?)([.,;:!?]*)$/.exec(tok), core=mm[1], tail=mm[2];
+    if(isMath&&OPS[core]) return OPS[core]+tail;
+    if(isMath&&UN[core]) return UN[core]+tail;
+    const nm=/^(\d+)([A-Za-z]*)$/.exec(core);
+    if(nm) return vnNum(+nm[1])+(nm[2]?' '+nm[2]:'')+tail;
+    return tok;
+  }).join('').replace(/\s+/g,' ').trim();
+}
+const isAscii=x=>/^[\x20-\x7E]+$/.test(x);
+function optParts(q,o){
+  o=String(o);
+  if(subject==='english'){
+    if(isAscii(o)&&!/^\d+$/.test(o)) return [{t:o.replace(/_{2,}/g,' blank '),lang:'en-US'}];
+    return [{t:viSay(o,false),lang:'vi-VN'}];
+  }
+  if(subject==='math'){
+    if(SIGN_SAY[o]) return [{t:SIGN_SAY[o],lang:'vi-VN'}];
+    if(/^[IVX]+$/.test(o)) return [{t:o.split('').join(' '),lang:'vi-VN'}];
+    return [{t:viSay(o,true),lang:'vi-VN'}];
+  }
+  if(q&&q.spk==='phon'&&PHON[o]) return [{t:PHON[o],lang:'vi-VN'}];
+  if(q&&q.spk==='alpha'&&ALPHA[o]) return [{t:ALPHA[o],lang:'vi-VN'}];
+  if(PUNCT_SAY[o]) return [{t:PUNCT_SAY[o],lang:'vi-VN'}];
+  return [{t:viSay(o,false),lang:'vi-VN'}];
+}
+function qSpeech(q,withOpts){
+  const isMath=subject==='math', en=subject==='english', parts=[];
+  const vi=t=>{ const x=viSay(t,isMath); if(x) parts.push({t:x,lang:'vi-VN'}); };
+  const enp=t=>{ const x=t.replace(/_{2,}/g,' blank ').replace(/\s+/g,' ').trim(); if(x) parts.push({t:x,lang:'en-US'}); };
+  if(q.say){
+    q.say.forEach(p=>{ if(typeof p==='string') vi(p); else if(p[1]==='en') enp(p[0]); else vi(p[0]); });
+  } else {
+    const hasWord=/[A-Za-z0-9\u00C0-\u1EF9]/.test(q.q), blank3=/_{3,}/.test(q.q);
+    const skipQ=!hasWord||(/_/.test(q.q)&&!blank3);
+    const qEn=en&&!skipQ&&isAscii(q.q)&&!/^\d+$/.test(q.q);
+    const subEn=en&&q.sub&&isAscii(q.sub);
+    const doSub=()=>{ if(!q.sub) return; if(subEn) enp(q.sub); else vi(q.sub); };
+    const doQ=()=>{ if(skipQ) return; if(qEn) enp(q.q); else vi(q.q); };
+    if((qEn&&q.q.length>1)||/này/.test(q.sub||'')){ doQ(); doSub(); } else { doSub(); doQ(); }
+  }
+  if(withOpts&&q.opts&&q.opts.length){
+    parts.push({t:'Các đáp án là',lang:'vi-VN'});
+    q.opts.forEach(o=>optParts(q,o).forEach(p=>parts.push(p)));
+  }
+  return parts;
+}
+const SP={id:0,speaking:false,onEnd:null};
+let voicesCache=[];
+function loadVoices(){ try{ voicesCache=speechSynthesis.getVoices()||[]; }catch(e){} }
+function pickVoice(lang){
+  const l=lang.toLowerCase(), pre=l.split('-')[0];
+  return voicesCache.find(v=>v.lang.toLowerCase().replace('_','-')===l)||voicesCache.find(v=>v.lang.toLowerCase().startsWith(pre))||null;
+}
+function hasVoice(pre){ return !voicesCache.length||voicesCache.some(v=>v.lang.toLowerCase().startsWith(pre)); }
+function stopSpeech(){ SP.id++; SP.speaking=false; SP.onEnd=null; try{ speechSynthesis.cancel(); }catch(e){} duck(false); }
+function speakParts(parts,o){
+  o=o||{}; const my=++SP.id; SP.onEnd=null;
+  try{ if(!('speechSynthesis' in window)){ SP.speaking=false; return; } speechSynthesis.cancel(); }catch(e){ SP.speaking=false; return; }
+  const list=parts.filter(p=>p&&p.t&&p.t.trim());
+  if((user.mute&&!o.force)||!list.length){ SP.speaking=false; duck(false); return; }
+  SP.speaking=true; duck(true);
+  const finish=()=>{ if(SP.id!==my||!SP.speaking) return; SP.speaking=false; duck(false); const f=SP.onEnd; SP.onEnd=null; if(f) f(); };
+  setTimeout(()=>{
+    if(SP.id!==my) return;
+    list.forEach((p,i)=>{
+      try{
+        const u=new SpeechSynthesisUtterance(p.t); u.lang=p.lang; const v=pickVoice(p.lang); if(v) u.voice=v; u.rate=.88; u.pitch=1.05;
+        if(i===list.length-1){ u.onend=finish; u.onerror=finish; }
+        speechSynthesis.speak(u);
+      }catch(e){ finish(); }
+    });
+  },60);
+  setTimeout(()=>{ if(SP.id===my&&SP.speaking) finish(); },list.reduce((a,p)=>a+p.t.length,0)*120+5000);
+}
+function speak(text,lang,force){ speakParts([{t:text,lang:lang}],{force:force}); }
+function speakQ(){ const q=G.q; if(!q) return; speakParts(qSpeech(q,user.readOpts),{force:true}); }
+function afterSpeech(cb,minMs){
+  let minOk=false, spOk=!SP.speaking, fired=false;
+  const go=()=>{ if(!fired&&minOk&&spOk){ fired=true; cb(); } };
+  later(()=>{ minOk=true; go(); },minMs);
+  if(!spOk){ SP.onEnd=()=>{ spOk=true; go(); }; later(()=>{ spOk=true; go(); },10000); }
+}
+/* Lời báo khi bé chọn sai: luôn gọi tên bé, có đọc to */
+function wrongNote(q,reveal,toastIt){
+  const n=(user.name||'Bé').trim()||'Bé';
+  const pre=pick([`${n} ơi, chưa đúng rồi.`,`Tiếc quá ${n} ơi!`,`${n} đừng buồn nhé.`]);
+  const post=pick(['Cố gắng lên nhé!','Mình thử lại nào!','Lần sau mình làm được nhé!']);
+  const parts=[{t:pre,lang:'vi-VN'}]; let text;
+  if(reveal&&q){
+    parts.push({t:'Đáp án đúng là',lang:'vi-VN'}); optParts(q,q.a).forEach(p=>parts.push(p)); parts.push({t:post,lang:'vi-VN'});
+    text=`${pre} Đáp án đúng là: ${q.a}. ${post}`;
+  } else { parts.push({t:post,lang:'vi-VN'}); text=`${pre} ${post}`; }
+  speakParts(parts);
+  if(toastIt) toast(text,2800);
+  return text;
+}
+function toggleMute(){ user.mute=!user.mute; save(); if(user.mute){ stopSpeech(); musicStop(); } else musicStart(); }
 
 /* =====================================================================
    HỘP THOẠI, THÔNG BÁO
@@ -519,12 +729,15 @@ function toast(t,ms){
 }
 function addStars(n){ user.stars+=n; save(); gain(n); }
 function rec(ok){ const s=user.stats[subject]; ok?s.c++:s.w++; }
-function judge(ok,q){
-  rec(ok);
+function judge(ok,q,o){
+  rec(ok); o=o||{};
   if(ok){
     sfx.ok(); addStars(config.starsPerCorrect);
     if(subject==='english' && q && /^[A-Za-z' ]+$/.test(q.a)) speak(q.a,'en-US');
-  } else sfx.bad();
+    return '';
+  }
+  sfx.bad();
+  return wrongNote(q,o.reveal,!o.inline);
 }
 
 /* =====================================================================
@@ -556,9 +769,9 @@ const gMissing=(lo,hi)=>()=>{const c=rnd(lo,hi),a=rnd(1,c-1),t=rnd(0,2);
   const q=t===0?`${a} + ▢ = ${c}`:t===1?`▢ + ${a} = ${c}`:`${c} − ▢ = ${c-a}`;
   const ans=t===2?a:c-a; return mk(q,ans,numOpts(ans,4),{sub:'Số nào điền vào ô trống?'});};
 const gCmp=max=>()=>{const x=rnd(0,max),y=Math.random()<.2?x:rnd(0,max),a=sign(x,y);
-  return mk(`${x}   ▢   ${y}`,a,['<','>','='].filter(s=>s!==a),{sub:'Điền dấu <, > hoặc = thích hợp'});};
+  return mk(`${x}   ▢   ${y}`,a,['<','>','='].filter(s=>s!==a),{sub:'Điền dấu <, > hoặc = thích hợp',say:['Điền dấu bé hơn, lớn hơn hoặc bằng vào chỗ trống, giữa '+vnNum(x)+' và '+vnNum(y)+'.']});};
 const gNext=max=>()=>{const n=rnd(1,max-1),after=Math.random()<.5,a=after?n+1:n-1;
-  return mk(n,a,numOpts(a,2),{sub:after?'Số liền sau của số này là?':'Số liền trước của số này là?'});};
+  return mk(n,a,numOpts(a,2),{sub:after?'Số liền sau của số này là?':'Số liền trước của số này là?',say:['Số liền '+(after?'sau':'trước')+' của số '+vnNum(n)+' là số nào?']});};
 const gExtreme=max=>()=>{const s=new Set();while(s.size<4)s.add(rnd(0,max));const arr=[...s],big=Math.random()<.5,ans=big?Math.max(...arr):Math.min(...arr);
   return mk(big?'Số nào lớn nhất?':'Số nào bé nhất?',ans,arr.filter(x=>x!==ans),{key:'ex|'+[...arr].sort().join(',')+big});};
 const gSeq=(max,steps)=>()=>{const ok=steps.filter(s=>s*3<=max*.8),s=pick(ok),desc=Math.random()<.3;
@@ -572,7 +785,7 @@ const gUnits=list=>()=>{const it=pick(list),pool=[7,10,12,24,30,60,100,1000];
 const MATH = {
 1:[
   gAdd(1,12,20), gSub(3,20), gMissing(5,20), gCmp(20), gNext(20), gExtreme(20), gSeq(20,[1,2,3,5]),
-  ()=>{const n=rnd(2,12),e=pick(THINGS);return mk(Array(n).fill(e).join(' '),n,numOpts(n,3),{sub:`Có bao nhiêu ${e}?`,key:'cnt|'+e+n});},
+  ()=>{const n=rnd(2,12),e=pick(THINGS);return mk(Array(n).fill(e).join(' '),n,numOpts(n,3),{sub:`Có bao nhiêu ${e}?`,key:'cnt|'+e+n,say:['Có bao nhiêu '+EMO_NAME[e]+'? Hãy đếm thật kỹ nhé.']});},
   ()=>{if(Math.random()<.5){const s=pick(SHAPES);return mk(s[0],s[1],SHAPES.filter(x=>x!==s).map(x=>x[1]),{sub:'Đây là hình gì?'});}
        const s=pick(SIDES);return mk(`Hình ${s[0]} có mấy cạnh?`,s[1],numOpts(s[1],2));},
   ()=>{const n=pick(NAMES),t=pick(THINGS);
@@ -614,7 +827,7 @@ const MATH = {
   ()=>{if(Math.random()<.5){const a=rnd(3,9),b=rnd(3,9);return mk(`Mỗi hộp có ${a} cái bánh. Hỏi ${b} hộp như thế có tất cả bao nhiêu cái bánh?`,a*b,numOpts(a*b,8));}
        const b=rnd(3,8),c=rnd(3,9),t=pick(THINGS);return mk(`Có ${b*c} ${t} chia đều cho ${b} bạn. Hỏi mỗi bạn được mấy ${t}?`,c,numOpts(c,3));},
   gUnits([['1 km = ? m',1000],['1 m = ? cm',100],['1 kg = ? g',1000],['1 cm = ? mm',10],['1 phút = ? giây',60],['1 giờ = ? phút',60]]),
-  ()=>{if(Math.random()<.5){const r=pick(ROMAN);return mk(r[0],r[1],numOpts(r[1],3),{sub:'Số La Mã này là số mấy?'});}
+  ()=>{if(Math.random()<.5){const r=pick(ROMAN);return mk(r[0],r[1],numOpts(r[1],3),{sub:'Số La Mã này là số mấy?',say:['Số La Mã '+r[0].split('').join(' ')+' là số mấy?']});}
        const r=pick(ROMAN);return mk(r[1],r[0],ROMAN.filter(x=>x!==r).map(x=>x[0]),{sub:'Số này viết bằng số La Mã là?'});},
   ()=>{const a=rnd(2,9),b=rnd(2,9),c=rnd(2,9),t=rnd(0,2);
        if(t===0)return mk(`${a} + ${b} × ${c}`,a+b*c,[(a+b)*c,...numOpts(a+b*c,6)],{sub:'Tính giá trị biểu thức'});
@@ -670,11 +883,11 @@ const SIMILE=['Mặt trăng tròn như quả bóng.','Bé cười tươi như ho
 const PLAIN=['Mặt trăng chiếu sáng cả sân nhà.','Mẹ đi làm về rất muộn.','Bé đang tưới hoa trong vườn.','Dòng sông chảy qua làng em.','Chim hót trên cành cây.'];
 const SUBPRED=[['Con mèo bắt chuột.','Con mèo','bắt chuột'],['Bạn Lan đang đọc sách.','Bạn Lan','đang đọc sách'],['Chim sơn ca hót líu lo.','Chim sơn ca','hót líu lo'],['Các bạn nhỏ chơi đá bóng.','Các bạn nhỏ','chơi đá bóng'],['Bố em lái xe đi làm.','Bố em','lái xe đi làm']];
 
-const vSpell=list=>()=>{const it=pick(list),g=it[0];return mk(it[1].replace('__','___'),it[2],g.filter(x=>x!==it[2]),{sub:'Điền '+g.join(' hay ')+' vào chỗ trống'});};
+const vSpell=list=>()=>{const it=pick(list),g=it[0];return mk(it[1].replace('__','___'),it[2],g.filter(x=>x!==it[2]),{sub:'Điền '+g.join(' hay ')+' vào chỗ trống',spk:'phon',say:['Điền '+g.map(l=>PHON[l]).join(' hay ')+' vào chỗ trống.',it[1].replace('__',' , chỗ trống , ')]});};
 const vOpp=()=>{const p=pick(OPPS),rev=Math.random()<.5,a=rev?p[1]:p[0],b=rev?p[0]:p[1];
-  const others=OPPS.flat().filter(x=>x!==a&&x!==b);return mk(a,b,sample(others,3),{sub:'Từ trái nghĩa với từ này là?'});};
+  const others=OPPS.flat().filter(x=>x!==a&&x!==b);return mk(a,b,sample(others,3),{sub:'Từ trái nghĩa với từ này là?',say:['Từ trái nghĩa với từ '+a+' là gì?']});};
 const vSyn=()=>{const p=pick(SYNS),rev=Math.random()<.5,a=rev?p[1]:p[0],b=rev?p[0]:p[1];
-  const others=[...SYNS.flat(),'buồn','nặng','cao','thấp'].filter(x=>x!==a&&x!==b);return mk(a,b,sample(others,3),{sub:'Từ đồng nghĩa với từ này là?'});};
+  const others=[...SYNS.flat(),'buồn','nặng','cao','thấp'].filter(x=>x!==a&&x!==b);return mk(a,b,sample(others,3),{sub:'Từ đồng nghĩa với từ này là?',say:['Từ đồng nghĩa với từ '+a+' là gì?']});};
 const vGroup=idx=>()=>{const gs=idx.map(i=>VGROUPS[i]),g=pick(gs),a=pick(g[1]);
   const w=sample(VGROUPS.filter(x=>x!==g).flatMap(x=>x[1]),3);return mk(`Từ nào chỉ ${g[0]}?`,a,w);};
 const vOdd=()=>{const gs=sample(VGROUPS,2),a=sample(gs[0][1],3),b=pick(gs[1][1]);
@@ -688,7 +901,7 @@ const vProv=n=>()=>{const list=PROVERBS.slice(0,n),p=pick(list);return mk(p[0],p
 const VIET = {
 1:[
   ()=>{const p=pick(PICS);return mk(p[0],p[1],sample(PICS.filter(x=>x!==p).map(x=>x[1]),3),{sub:'Đây là gì?'});},
-  ()=>{const p=pick(INIT);return mk(`"${p[0]}"`,p[1],sample(LETTERS.filter(x=>x!==p[1]),3),{sub:'Từ này bắt đầu bằng chữ cái nào?'});},
+  ()=>{const p=pick(INIT);return mk(`"${p[0]}"`,p[1],sample(LETTERS.filter(x=>x!==p[1]),3),{sub:'Từ này bắt đầu bằng chữ cái nào?',spk:'alpha',say:['Từ '+p[0]+' bắt đầu bằng chữ cái nào?']});},
   vSpell(SP1),
   ()=>{const p=pick(COUNTS);return mk(p[0],p[1],numOpts(p[1],2),{sub:'Câu này có mấy tiếng?'});},
   vOpp, vGroup([0,1,2,3]), vSpell(SP1)
@@ -707,8 +920,8 @@ const VIET = {
   vProv(10), vProv(10), vSyn, vOpp, vClass, vGroup([0,1,2,3,4,5,6]), vOdd, vSpell(SP2),
   ()=>mk('Câu nào có hình ảnh so sánh?',pick(SIMILE),sample(PLAIN,3)),
   ()=>{const p=pick(SUBPRED);
-       if(Math.random()<.5)return mk(p[0],p[1],sample(SUBPRED.filter(x=>x!==p).map(x=>x[1]).concat([p[2]]),3),{sub:'Bộ phận nào trả lời câu hỏi "Ai (con gì, cái gì)?"'});
-       return mk(p[0],p[2],sample(SUBPRED.filter(x=>x!==p).map(x=>x[2]).concat([p[1]]),3),{sub:'Bộ phận nào trả lời câu hỏi "Làm gì?"'});},
+       if(Math.random()<.5)return mk(p[0],p[1],sample(SUBPRED.filter(x=>x!==p).map(x=>x[1]).concat([p[2]]),3),{sub:'Bộ phận nào trả lời câu hỏi "Ai (con gì, cái gì)?"',say:['Trong câu: '+p[0],'Bộ phận nào trả lời câu hỏi: Ai, con gì, cái gì?']});
+       return mk(p[0],p[2],sample(SUBPRED.filter(x=>x!==p).map(x=>x[2]).concat([p[1]]),3),{sub:'Bộ phận nào trả lời câu hỏi "Làm gì?"',say:['Trong câu: '+p[0],'Bộ phận nào trả lời câu hỏi: Làm gì?']});},
   ()=>mk('Từ nào dùng để so sánh trong câu "Bé cười tươi như hoa."?','như',['bé','tươi','hoa'])
 ]};
 
@@ -798,7 +1011,7 @@ function nextQ(){
    ĐIỀU KHIỂN CHUNG
    ===================================================================== */
 let G={token:0,timers:[],q:null,lock:false,st:null};
-function stopAll(){ try{ if(G.rec) G.rec.abort(); }catch(e){} G.rec=null; G.token++; G.timers.forEach(t=>{clearTimeout(t);clearInterval(t);}); G.timers=[]; G.lock=false; try{speechSynthesis.cancel();}catch(e){} }
+function stopAll(){ try{ if(G.rec) G.rec.abort(); }catch(e){} G.rec=null; stopSpeech(); G.token++; G.timers.forEach(t=>{clearTimeout(t);clearInterval(t);}); G.timers=[]; G.lock=false; }
 function later(fn,ms){ const tk=G.token; const t=setTimeout(()=>{ if(tk===G.token) fn(); },ms); G.timers.push(t); return t; }
 function every(fn,ms){ const tk=G.token; const t=setInterval(()=>{ if(tk===G.token) fn(); },ms); G.timers.push(t); return t; }
 
@@ -859,6 +1072,14 @@ function hit(id){ const el=$(id); if(!el) return; el.classList.remove('shake'); 
    ===================================================================== */
 function quiz(){
   G.st={i:0,ok:0,streak:0,total:10};
+  const warn=(!hasVoice('vi')&&subject!=='english')?'<p class="note warn">⚠️ Máy này chưa có giọng đọc tiếng Việt. Hãy cài giọng "Tiếng Việt" trong phần Cài đặt (Ngôn ngữ / Giọng nói) của thiết bị để nghe đọc chính xác.</p>':'';
+  $('game').innerHTML=`<div class="start-card"><div class="start-emoji">📝</div><h3>Làm bài ${SUBJ_NAME[subject]} - Lớp ${grade}</h3>
+    <p>Có 10 câu hỏi. Máy sẽ tự đọc to từng câu hỏi cho ${esc(user.name)} nghe.</p>
+    <label class="chk"><input type="checkbox" id="optRead" ${user.readOpts?'checked':''} onchange="user.readOpts=this.checked;save()"> Đọc cả các đáp án</label><br>
+    <button class="btn primary big" onclick="quizBegin()">▶ Bắt đầu</button>${warn}</div>`;
+}
+function quizBegin(){
+  stopSpeech();
   $('game').innerHTML=`<div class="progress"><div id="pbar"></div></div><div class="hud"><span id="qno"></span><span id="qstreak"></span></div><div id="qarea"></div><div class="fb" id="qfb"></div>`;
   quizNext();
 }
@@ -871,14 +1092,14 @@ function quizNext(){
   $('qarea').innerHTML=qHTML(G.q)+'<div class="opts" id="opts"></div>';
   $('qfb').textContent=''; $('qfb').className='fb';
   buildOpts($('opts'),G.q,quizPick);
+  speakParts(qSpeech(G.q,user.readOpts));
 }
 function quizPick(o,b){
-  if(G.lock) return; G.lock=true;
+  if(G.lock) return; G.lock=true; stopSpeech();
   const st=G.st, ok=o===G.q.a;
-  reveal($('opts'),G.q,b,o); judge(ok,G.q); st.i++;
-  if(ok){ st.ok++; st.streak++; $('qfb').textContent='Giỏi lắm!'; $('qfb').className='fb good'; }
-  else { st.streak=0; $('qfb').textContent='Đáp án đúng là: '+G.q.a; $('qfb').className='fb bad'; }
-  later(quizNext, ok?900:1900);
+  reveal($('opts'),G.q,b,o); const msg=judge(ok,G.q,{reveal:true,inline:true}); st.i++;
+  if(ok){ st.ok++; st.streak++; $('qfb').textContent='Giỏi lắm, '+user.name+'!'; $('qfb').className='fb good'; later(quizNext,900); }
+  else { st.streak=0; $('qfb').textContent=msg; $('qfb').className='fb bad'; afterSpeech(quizNext,1900); }
 }
 function quizEnd(){
   const st=G.st, c=config.starsPerCorrect;
@@ -954,7 +1175,7 @@ function bossNext(){
 function bossPick(o,b){
   if(G.lock) return; G.lock=true;
   const st=G.st, ok=o===G.q.a, bs=BOSSES[bossIdx];
-  reveal($('opts'),G.q,b,o); judge(ok,G.q);
+  reveal($('opts'),G.q,b,o); judge(ok,G.q,{reveal:true});
   if(ok){
     st.hp--; hit('bossA'); bossUI();
     if(st.hp<=0){
@@ -999,7 +1220,7 @@ function raceNext(){
 }
 function racePick(o,b){
   if(G.lock||G.st.over) return; G.lock=true;
-  const ok=o===G.q.a; reveal($('opts'),G.q,b,o); judge(ok,G.q);
+  const ok=o===G.q.a; reveal($('opts'),G.q,b,o); judge(ok,G.q,{reveal:true});
   if(ok) G.st.me+=16; else G.st.foe+=5;
   raceUI(); raceCheck();
   if(!G.st.over) later(raceNext, ok?800:1500);
@@ -1157,7 +1378,7 @@ function sortCheck(){
     judge(true,null); later(sortNext,1200);
   } else {
     rec(false); sfx.bad(); hit('slots');
-    $('qfb').textContent='Chưa đúng, thử lại nhé!'; $('qfb').className='fb bad';
+    $('qfb').textContent=wrongNote(null,false,false); $('qfb').className='fb bad';
     later(()=>{ s.slots=s.slots.map(()=>null); s.bank.forEach(t=>t.used=false); sortDraw(); $('qfb').textContent=''; G.lock=false; },1000);
   }
 }
@@ -1238,25 +1459,36 @@ function verifyParent(){
   if(parseInt($('parentAns').value,10)===pAns){ closeModal('parentAuth'); if(gateCb){ const f=gateCb; gateCb=null; f(); } else openParentSettings(); }
   else toast('Kết quả chưa đúng, thử lại nhé!');
 }
+let shopDraft=[];
 function openParentSettings(){
   $('cfgStars').value=config.starsPerCorrect;
   $('statRows').innerHTML=SUBJ.map(s=>`<tr><td>${SUBJ_NAME[s]}</td><td>${user.stats[s].c}</td><td>${user.stats[s].w}</td></tr>`).join('');
-  drawShopEdit(); $('niTitle').value=''; $('niPrice').value=''; $('niIcon').value=''; openModal('parentSettings');
+  shopDraft=shop.map(x=>Object.assign({},x)); drawShopEdit();
+  ['niTitle','niPrice','niIcon'].forEach(id=>{ $(id).value=''; }); openModal('parentSettings');
 }
 function drawShopEdit(){
   const box=$('shopEdit'); box.innerHTML='';
-  shop.forEach(it=>{
+  shopDraft.forEach(it=>{
     const r=document.createElement('div'); r.className='mini';
-    r.innerHTML=`<span>${esc(it.icon)} ${esc(it.title)} · ⭐ ${it.price}</span>`;
-    const b=document.createElement('button'); b.textContent='Xóa'; b.onclick=()=>{ shop=shop.filter(x=>x.id!==it.id); drawShopEdit(); };
+    r.innerHTML=`<span>${esc(it.icon)} ${esc(it.title)} · ⭐ ${it.price}${it.isNew?' <em class="newtag">mới</em>':''}</span>`;
+    const b=document.createElement('button'); b.textContent='Xóa'; b.onclick=()=>{ shopDraft=shopDraft.filter(x=>x.id!==it.id); drawShopEdit(); };
     r.appendChild(b); box.appendChild(r);
   });
+  const n=shopDraft.filter(x=>x.isNew).length;
+  $('draftNote').textContent=n?`Đã thêm ${n} quà mới. Thêm tiếp hoặc bấm "Lưu tất cả" để lưu một lần.`:'';
+}
+function addDraftItem(){
+  const t=$('niTitle').value.trim(), p=parseInt($('niPrice').value,10), ic=$('niIcon').value.trim()||'🎁';
+  if(!t||!(p>0)){ toast('Hãy nhập tên quà và số sao (lớn hơn 0)'); return false; }
+  shopDraft.push({id:Date.now()+Math.floor(Math.random()*1000),title:t,price:p,icon:ic,isNew:true});
+  ['niTitle','niPrice','niIcon'].forEach(id=>{ $(id).value=''; }); drawShopEdit(); $('niTitle').focus(); return true;
 }
 function saveParent(){
-  const v=parseInt($('cfgStars').value,10); config.starsPerCorrect=v>0?Math.min(100,v):10;
-  const t=$('niTitle').value.trim(), p=parseInt($('niPrice').value,10), ic=$('niIcon').value.trim()||'🎁';
-  if(t&&p>0) shop.push({id:Date.now(),title:t,price:p,icon:ic});
-  save(); closeModal('parentSettings'); toast('Đã lưu cài đặt');
+  const v=parseInt($('cfgStars').value,10);
+  if($('niTitle').value.trim()||$('niPrice').value.trim()){ if(!addDraftItem()) return; }
+  config.starsPerCorrect=v>0?Math.min(100,v):10;
+  shop=shopDraft.map(x=>({id:x.id,title:x.title,price:x.price,icon:x.icon}));
+  save(); closeModal('parentSettings'); toast('Đã lưu cài đặt và '+shop.length+' món quà');
 }
 function askReset(){
   dialog({icon:'🗑️',title:'Xóa toàn bộ dữ liệu?',text:'Sao, quà và kết quả học sẽ bị xóa và không lấy lại được.',buttons:[
@@ -1353,7 +1585,7 @@ function linkTap(side,i,b){
     st.done++; judge(true,null); $('lkp').textContent=`Đã ghép: ${st.done}/${st.n}`;
     if(st.done===st.n) later(linkEnd,700);
   } else {
-    st.miss++; rec(false); sfx.bad(); $('lkm').textContent='Nhầm: '+st.miss;
+    st.miss++; rec(false); sfx.bad(); wrongNote(null,false,true); $('lkm').textContent='Nhầm: '+st.miss;
     [a.el,b].forEach(x=>{ x.classList.remove('shake'); void x.offsetWidth; x.classList.add('shake'); });
   }
 }
@@ -1405,7 +1637,9 @@ function fishWave(){
    ===================================================================== */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 function vnNum(n){
+  if(n>=10000) return String(n);
   const U=['không','một','hai','ba','bốn','năm','sáu','bảy','tám','chín'];
+  if(n>=1000){ const th=Math.floor(n/1000), r=n%1000; return U[th]+' nghìn'+(r===0?'':r<10?' không trăm linh '+U[r]:r<100?' không trăm '+vnNum(r):' '+vnNum(r)); }
   if(n<10) return U[n];
   if(n<20){ const u=n%10; return 'mười'+(u?' '+(u===5?'lăm':U[u]):''); }
   if(n<100){ const t=Math.floor(n/10), u=n%10; return U[t]+' mươi'+(u?' '+(u===1?'mốt':u===5?'lăm':U[u]):''); }
@@ -1590,6 +1824,14 @@ function readEnd(){
    ===================================================================== */
 window.addEventListener('DOMContentLoaded',()=>{
   load(); applySkin(user.skin); refresh(); drawModes(); startMode();
+  try{ loadVoices(); if('speechSynthesis' in window) speechSynthesis.onvoiceschanged=loadVoices; }catch(e){}
+  /* Âm thanh khi chạm nút + khởi động nhạc nền ở lần chạm đầu tiên */
+  document.addEventListener('pointerdown',e=>{
+    const b=e.target.closest&&e.target.closest('button');
+    if(b&&!b.disabled) sfx.click();
+    if(!mus.playing&&user.music.on&&!user.mute) musicStart();
+  },true);
+  if(user.music.on&&!user.mute) setTimeout(()=>{ if(!mus.playing) toast('🎵 Chạm vào màn hình để bật nhạc nền',3200); },700);
 });
 </script>
 </body>
