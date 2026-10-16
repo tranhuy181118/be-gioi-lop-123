@@ -68,7 +68,8 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--pencil);outline
 .hello{font:800 1.5rem var(--font-display);margin:2px 0 12px}
 
 /* ===== Môn học & lớp ===== */
-.subjects{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.subjects{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+@media (max-width:480px){.subj{font-size:.85rem!important;padding:8px 2px!important}.subj span{font-size:1.3rem!important}}
 .subj{border:var(--bw) solid var(--line);background:var(--card);border-radius:var(--r-m);padding:10px 6px;font:800 1.05rem var(--font-display);box-shadow:var(--sh-m);display:flex;flex-direction:column;align-items:center;gap:2px}
 .subj span{font-size:1.5rem;line-height:1}
 .subj.on{background:var(--pencil);color:#3a2a00;border-color:#3a2a00;box-shadow:0 4px 0 #3a2a00}
@@ -199,9 +200,13 @@ th,td{border-bottom:2px dashed var(--grid);padding:6px 4px;text-align:left}
 .mini{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-bottom:2px dashed var(--grid)}
 .mini button{border:2px solid var(--red);color:var(--red);background:transparent;border-radius:8px;padding:2px 8px;font-weight:800}
 
+.gain.loss{background:var(--red)!important;color:#fff!important;border-color:#8f1f27!important}
 .gain{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:300;background:var(--pencil);color:#3a2a00;border:3px solid #3a2a00;border-radius:30px;padding:6px 18px;font:800 1.3rem var(--font-display);animation:floatUp 1s ease-out forwards;pointer-events:none}
 @keyframes floatUp{from{opacity:1;transform:translate(-50%,0)}to{opacity:0;transform:translate(-50%,-70px)}}
 .toast{position:fixed;left:50%;top:80px;transform:translateX(-50%);z-index:300;background:var(--ink);color:var(--card);border-radius:var(--r-m);padding:10px 18px;font:800 1rem var(--font-display);max-width:90%;text-align:center;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+/* ===== Nhãn môn trong chế độ Tổng hợp ===== */
+.q-tag{display:inline-block;padding:2px 12px;border-radius:20px;font:800 .8rem var(--font-body);margin-bottom:6px;color:#fff}
+.q-tag.math{background:#2f6fe0} .q-tag.vietnamese{background:#d9363e}
 /* ===== Bắt đầu / nhạc / quà ===== */
 .start-card{text-align:center;padding:14px 6px}
 .start-emoji{font-size:3.6rem;line-height:1.1}
@@ -339,6 +344,7 @@ th,td{border-bottom:2px dashed var(--grid);padding:6px 4px;text-align:left}
       <button class="subj on" id="s-math" onclick="selectSubject('math')"><span>🧮</span>Toán</button>
       <button class="subj" id="s-vietnamese" onclick="selectSubject('vietnamese')"><span>📖</span>Tiếng Việt</button>
       <button class="subj" id="s-english" onclick="selectSubject('english')"><span>🔤</span>Tiếng Anh</button>
+      <button class="subj" id="s-mix" onclick="selectSubject('mix')"><span>🌈</span>Tổng hợp</button>
     </nav>
     <div class="sheet">
       <div class="grades">
@@ -391,7 +397,9 @@ th,td{border-bottom:2px dashed var(--grid);padding:6px 4px;text-align:left}
 
 <div id="parentSettings" class="modal-bg hidden"><div class="modal">
   <h3>⚙️ Cài đặt phụ huynh</h3>
-  <div class="field"><label for="cfgStars">Số sao thưởng cho mỗi câu đúng</label><input id="cfgStars" type="number" min="1" max="100"></div>
+  <div class="field"><label for="cfgStars">Số sao thưởng cho mỗi câu đúng</label><input id="cfgStars" type="number" min="1" max="100">
+    <label class="chk" style="margin:10px 0 0"><input type="checkbox" id="cfgPenalty"> Trả lời sai bị trừ một nửa số sao của câu đúng</label>
+    <p class="note" id="penaltyNote" style="margin:4px 0 0"></p></div>
   <h3 style="font-size:1.05rem;margin-top:6px">📊 Kết quả học</h3>
   <table><thead><tr><th>Môn</th><th>Đúng</th><th>Sai</th></tr></thead><tbody id="statRows"></tbody></table>
   <h3 style="font-size:1.05rem">🎁 Danh sách quà</h3>
@@ -437,7 +445,8 @@ const shuffle = a => { a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.f
 const sample = (a,n) => shuffle(a).slice(0,n);
 const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const SUBJ = ['math','vietnamese','english'];
-const SUBJ_NAME = {math:'Toán', vietnamese:'Tiếng Việt', english:'Tiếng Anh'};
+const SUBJ_NAME = {math:'Toán', vietnamese:'Tiếng Việt', english:'Tiếng Anh', mix:'Tổng hợp'};
+const TABS = ['math','vietnamese','english','mix'];
 
 /* =====================================================================
    DỮ LIỆU NGƯỜI DÙNG
@@ -451,7 +460,7 @@ const DEFAULT_SHOP = [
 ];
 const AVATARS = ['🧒','👧','👦','🐱','🐶','🐰','🦊','🐼','🐯','🦁','🐸','🦄'];
 let user = {stars:0,name:'Bé',avatarImg:null,avatarEmoji:'🧒',vault:[],mute:false,skin:'notebook',music:{on:true,song:'aucl',vol:.5},readOpts:true,stats:{}};
-let config = {starsPerCorrect:10};
+let config = {starsPerCorrect:10,penalty:true};
 let shop = DEFAULT_SHOP.slice();
 let seenMap = {};
 let subject='math', grade=1, mode='quiz';
@@ -617,12 +626,12 @@ function viSay(t,isMath){
 }
 const isAscii=x=>/^[\x20-\x7E]+$/.test(x);
 function optParts(q,o){
-  o=String(o);
-  if(subject==='english'){
+  o=String(o); const sj=(q&&q.subj)||subject;
+  if(sj==='english'){
     if(isAscii(o)&&!/^\d+$/.test(o)) return [{t:o.replace(/_{2,}/g,' blank '),lang:'en-US'}];
     return [{t:viSay(o,false),lang:'vi-VN'}];
   }
-  if(subject==='math'){
+  if(sj==='math'){
     if(SIGN_SAY[o]) return [{t:SIGN_SAY[o],lang:'vi-VN'}];
     if(/^[IVX]+$/.test(o)) return [{t:o.split('').join(' '),lang:'vi-VN'}];
     return [{t:viSay(o,true),lang:'vi-VN'}];
@@ -633,7 +642,7 @@ function optParts(q,o){
   return [{t:viSay(o,false),lang:'vi-VN'}];
 }
 function qSpeech(q,withOpts){
-  const isMath=subject==='math', en=subject==='english', parts=[];
+  const sj=q.subj||subject, isMath=sj==='math', en=sj==='english', parts=[];
   const vi=t=>{ const x=viSay(t,isMath); if(x) parts.push({t:x,lang:'vi-VN'}); };
   const enp=t=>{ const x=t.replace(/_{2,}/g,' blank ').replace(/\s+/g,' ').trim(); if(x) parts.push({t:x,lang:'en-US'}); };
   if(q.say){
@@ -678,7 +687,7 @@ function speakParts(parts,o){
         speechSynthesis.speak(u);
       }catch(e){ finish(); }
     });
-  },60);
+  },o.delay||60);
   setTimeout(()=>{ if(SP.id===my&&SP.speaking) finish(); },list.reduce((a,p)=>a+p.t.length,0)*120+5000);
 }
 function speak(text,lang,force){ speakParts([{t:text,lang:lang}],{force:force}); }
@@ -699,8 +708,18 @@ function wrongNote(q,reveal,toastIt){
     parts.push({t:'Đáp án đúng là',lang:'vi-VN'}); optParts(q,q.a).forEach(p=>parts.push(p)); parts.push({t:post,lang:'vi-VN'});
     text=`${pre} Đáp án đúng là: ${q.a}. ${post}`;
   } else { parts.push({t:post,lang:'vi-VN'}); text=`${pre} ${post}`; }
-  speakParts(parts);
+  speakParts(parts,{delay:450});
   if(toastIt) toast(text,2800);
+  return text;
+}
+/* Lời khen khi bé trả lời đúng: gọi tên bé, hiện chữ và đọc to */
+function rightNote(q,toastIt){
+  const n=(user.name||'Bé').trim()||'Bé';
+  const text=pick([`Đúng rồi, ${n} giỏi quá!`,`Chính xác! ${n} làm tốt lắm!`,`Tuyệt vời ${n} ơi!`,`${n} giỏi lắm, đúng rồi!`]);
+  const parts=[{t:text,lang:'vi-VN'}];
+  if(q&&(q.subj||subject)==='english'&&/^[A-Za-z' ]+$/.test(q.a)) parts.push({t:q.a,lang:'en-US'});
+  speakParts(parts,{delay:350});
+  if(toastIt) toast(text,1800);
   return text;
 }
 function toggleMute(){ user.mute=!user.mute; save(); if(user.mute){ stopSpeech(); musicStop(); } else musicStart(); }
@@ -719,8 +738,8 @@ function dialog(o){
   });
   openModal('dlg');
 }
-function gain(n){
-  const el=document.createElement('div'); el.className='gain'; el.textContent='+'+n+' ⭐';
+function gain(n,loss){
+  const el=document.createElement('div'); el.className='gain'+(loss?' loss':''); el.textContent=(loss?'−':'+')+n+' ⭐';
   document.body.appendChild(el); setTimeout(()=>el.remove(),1000);
 }
 function toast(t,ms){
@@ -728,16 +747,24 @@ function toast(t,ms){
   document.body.appendChild(el); setTimeout(()=>el.remove(),ms||2200);
 }
 function addStars(n){ user.stars+=n; save(); gain(n); }
-function rec(ok){ const s=user.stats[subject]; ok?s.c++:s.w++; }
+/* Trả lời sai: trừ một nửa số sao của câu đúng (làm tròn lên), không xuống dưới 0 */
+function penaltyAmount(){ return Math.ceil(config.starsPerCorrect/2); }
+function applyPenalty(){
+  if(config.penalty===false) return 0;
+  const d=Math.min(user.stars,penaltyAmount());
+  if(d>0){ user.stars-=d; save(); gain(d,true); }
+  return d;
+}
+function rec(ok,sj){ const k=sj||(subject==='mix'?(G.curSub||'math'):subject), s=user.stats[k]||user.stats.math; ok?s.c++:s.w++; }
 function judge(ok,q,o){
-  rec(ok); o=o||{};
+  rec(ok,q&&q.subj); o=o||{};
   if(ok){
     sfx.ok(); addStars(config.starsPerCorrect);
-    if(subject==='english' && q && /^[A-Za-z' ]+$/.test(q.a)) speak(q.a,'en-US');
-    return '';
+    return rightNote(q,!o.inline);
   }
-  sfx.bad();
-  return wrongNote(q,o.reveal,!o.inline);
+  sfx.bad(); const lost=applyPenalty();
+  const t=wrongNote(q,o.reveal,!o.inline);
+  return (lost&&o.inline)?t+' (−'+lost+' ⭐)':t;
 }
 
 /* =====================================================================
@@ -992,8 +1019,12 @@ function finalize(q){
   const w=[...new Set(q.w.map(String))].filter(x=>x!==q.a).slice(0,3);
   return Object.assign({},q,{w:w,opts:shuffle([q.a].concat(w))});
 }
+const MIXSUBJ=['math','vietnamese']; let mixTurn=0;
+function nextSub(){ return subject==='mix'?MIXSUBJ[(mixTurn++)%MIXSUBJ.length]:subject; }
+function tagHTML(sj){ return subject==='mix'&&sj?`<div class="q-tag ${sj}">${sj==='math'?'🧮 Toán':'📖 Tiếng Việt'}</div>`:''; }
 function nextQ(){
-  const k=subject+grade, gens=GENS[subject][grade];
+  const sj=nextSub(); G.curSub=sj;
+  const k=sj+grade, gens=GENS[sj][grade];
   const seen=seenMap[k]||(seenMap[k]=[]);
   let q=null;
   for(let t=0;t<40&&!q;t++){
@@ -1004,7 +1035,7 @@ function nextQ(){
   if(!q){ seen.length=0; q=pick(gens)(); }
   seen.push(q.key); if(seen.length>150) seen.shift();
   persistSeen();
-  return finalize(q);
+  const r=finalize(q); r.subj=sj; return r;
 }
 
 /* =====================================================================
@@ -1036,7 +1067,7 @@ function drawModes(){
   const cur=MODES.find(m=>m[0]===mode); $('modeNote').textContent=cur?cur[3]:'';
 }
 function selectSubject(s){
-  subject=s; SUBJ.forEach(x=>$('s-'+x).classList.toggle('on',x===s));
+  subject=s; TABS.forEach(x=>$('s-'+x).classList.toggle('on',x===s));
   view('study');
 }
 function selectGrade(g){
@@ -1045,7 +1076,7 @@ function selectGrade(g){
 }
 function selectMode(m){ mode=m; startMode(); }
 function startMode(){
-  stopAll(); G.q=null; G.st=null; drawModes();
+  stopAll(); G.q=null; G.st=null; mixTurn=0; drawModes();
   $('game').innerHTML=''; MODE_FN[mode]();
 }
 function view(v){
@@ -1055,7 +1086,7 @@ function view(v){
 
 /* ---------- khối hiển thị câu hỏi dùng chung ---------- */
 function qHTML(q){
-  return `<div class="qbox"><button class="speak" onclick="speakQ()" aria-label="Đọc câu hỏi">🔊</button>${q.sub?`<div class="q-sub">${esc(q.sub)}</div>`:''}<div class="q-main${q.q.length>34?' long':''}">${esc(q.q)}</div></div>`;
+  return `<div class="qbox"><button class="speak" onclick="speakQ()" aria-label="Đọc câu hỏi">🔊</button>${tagHTML(q.subj)}${q.sub?`<div class="q-sub">${esc(q.sub)}</div>`:''}<div class="q-main${q.q.length>34?' long':''}">${esc(q.q)}</div></div>`;
 }
 function buildOpts(box,q,fn){
   box.innerHTML='';
@@ -1074,7 +1105,7 @@ function quiz(){
   G.st={i:0,ok:0,streak:0,total:10};
   const warn=(!hasVoice('vi')&&subject!=='english')?'<p class="note warn">⚠️ Máy này chưa có giọng đọc tiếng Việt. Hãy cài giọng "Tiếng Việt" trong phần Cài đặt (Ngôn ngữ / Giọng nói) của thiết bị để nghe đọc chính xác.</p>':'';
   $('game').innerHTML=`<div class="start-card"><div class="start-emoji">📝</div><h3>Làm bài ${SUBJ_NAME[subject]} - Lớp ${grade}</h3>
-    <p>Có 10 câu hỏi. Máy sẽ tự đọc to từng câu hỏi cho ${esc(user.name)} nghe.</p>
+    <p>Có 10 câu hỏi${subject==='mix'?', Toán 🧮 và Tiếng Việt 📖 xen kẽ từng câu':''}. Máy sẽ tự đọc to từng câu hỏi cho ${esc(user.name)} nghe.</p>
     <label class="chk"><input type="checkbox" id="optRead" ${user.readOpts?'checked':''} onchange="user.readOpts=this.checked;save()"> Đọc cả các đáp án</label><br>
     <button class="btn primary big" onclick="quizBegin()">▶ Bắt đầu</button>${warn}</div>`;
 }
@@ -1098,7 +1129,7 @@ function quizPick(o,b){
   if(G.lock) return; G.lock=true; stopSpeech();
   const st=G.st, ok=o===G.q.a;
   reveal($('opts'),G.q,b,o); const msg=judge(ok,G.q,{reveal:true,inline:true}); st.i++;
-  if(ok){ st.ok++; st.streak++; $('qfb').textContent='Giỏi lắm, '+user.name+'!'; $('qfb').className='fb good'; later(quizNext,900); }
+  if(ok){ st.ok++; st.streak++; $('qfb').textContent=msg; $('qfb').className='fb good'; afterSpeech(quizNext,1500); }
   else { st.streak=0; $('qfb').textContent=msg; $('qfb').className='fb bad'; afterSpeech(quizNext,1900); }
 }
 function quizEnd(){
@@ -1230,17 +1261,18 @@ function racePick(o,b){
    TRÒ 5: LẬT THẺ
    ===================================================================== */
 function makePairs(n){
+  const sj=nextSub(); G.curSub=sj;
   const out=[], used=new Set();
   const add=(a,b)=>{ a=String(a); b=String(b); if(a===b||used.has(a)||used.has(b)) return; used.add(a); used.add(b); out.push([a,b]); };
   let t=0;
   while(out.length<n && t++<400){
-    if(subject==='math'){
+    if(sj==='math'){
       let a,b,e,r;
       if(grade===1){ a=rnd(1,9); b=rnd(1,9); if(Math.random()<.5){e=`${a} + ${b}`;r=a+b;} else { if(a<b)[a,b]=[b,a]; e=`${a} − ${b}`; r=a-b; } }
       else if(grade===2){ if(Math.random()<.5){a=rnd(10,60);b=rnd(5,30);e=`${a} + ${b}`;r=a+b;} else {a=pick([2,5]);b=rnd(2,10);e=`${a} × ${b}`;r=a*b;} }
       else { a=rnd(2,9); b=rnd(2,9); e=`${a} × ${b}`; r=a*b; }
       add(e,r);
-    } else if(subject==='vietnamese'){
+    } else if(sj==='vietnamese'){
       if(grade===1){ const p=pick(PICS); add(p[0],p[1]); }
       else if(grade===2){ const p=pick(OPPS); add(p[0],p[1]); }
       else { const p=pick(Math.random()<.5?OPPS:SYNS); add(p[0],p[1]); }
@@ -1255,7 +1287,7 @@ function memory(){
   const pairs=makePairs(6), total=pairs.length;
   const deck=shuffle(pairs.flatMap((p,i)=>[{id:i,t:p[0]},{id:i,t:p[1]}]));
   G.st={deck:deck,open:[],done:0,moves:0,busy:false,total:total};
-  $('game').innerHTML=`<div class="hud"><span id="mv">Lượt lật: 0</span><span id="mp">Cặp đúng: 0/${total}</span></div><div class="mcards" id="mc"></div>`;
+  $('game').innerHTML=`${tagHTML(G.curSub)}<div class="hud"><span id="mv">Lượt lật: 0</span><span id="mp">Cặp đúng: 0/${total}</span></div><div class="mcards" id="mc"></div>`;
   deck.forEach((c,i)=>{
     const b=document.createElement('button'); b.className='mcard'; b.textContent='❓'; b.setAttribute('aria-label','Thẻ '+(i+1));
     b.onclick=()=>flip(i); c.el=b; $('mc').appendChild(b);
@@ -1305,7 +1337,7 @@ function speedAns(v){
   const ok=v===st.claim.truth; rec(ok);
   $('claim').classList.add(ok?'good':'bad');
   if(ok){ st.score++; st.combo++; st.best=Math.max(st.best,st.combo); sfx.ok(); addStars(Math.max(1,Math.round(config.starsPerCorrect/2))); }
-  else { st.combo=0; st.t=Math.max(0,st.t-2); sfx.bad(); }
+  else { st.combo=0; st.t=Math.max(0,st.t-2); sfx.bad(); applyPenalty(); }
   $('spS').textContent='Đúng: '+st.score; $('spC').textContent=st.combo>=3?'🔥 x'+st.combo:'';
   later(()=>{ if(G.st.t>0) speedNext(); },380);
 }
@@ -1325,14 +1357,15 @@ const SORT_VI={
 const SORT_EN3=[['I','am','a','student'],['She','is','my','sister'],['This','is','my','book'],['I','like','red','apples'],['He','has','a','dog'],['We','go','to','school'],['They','are','my','friends']];
 let sortSeen=[];
 function sortItem(){
+  const sj=nextSub(); G.curSub=sj;
   let it=null;
   for(let t=0;t<20;t++){
     let c;
-    if(subject==='math'){
+    if(sj==='math'){
       const n=grade===3?5:4, max=[0,20,99,999][grade], s=new Set(); while(s.size<n) s.add(rnd(0,max));
       const nums=[...s], asc=Math.random()<.65, target=nums.slice().sort((a,b)=>asc?a-b:b-a).map(String);
       c={title:asc?'Xếp các số từ bé đến lớn':'Xếp các số từ lớn đến bé',hint:'',target:target,tiles:shuffle(nums.map(String))};
-    } else if(subject==='vietnamese'){
+    } else if(sj==='vietnamese'){
       const w=pick(SORT_VI[grade]); c={title:'Xếp các từ thành một câu đúng',hint:'',target:w,tiles:shuffle(w)};
     } else if(grade<3){
       const e=pick(V12.filter(x=>/^[a-z]{3,7}$/.test(x[1]))), l=e[1].split('');
@@ -1340,7 +1373,7 @@ function sortItem(){
     } else {
       const w=pick(SORT_EN3); c={title:'Xếp các từ thành câu tiếng Anh',hint:'',target:w,tiles:shuffle(w)};
     }
-    c.key=c.target.join('|');
+    c.subj=sj; c.key=c.target.join('|');
     let tries=0; while(c.tiles.join('|')===c.target.join('|')&&tries++<10) c.tiles=shuffle(c.tiles);
     if(!sortSeen.includes(c.key)){ it=c; break; }
     it=c;
@@ -1352,7 +1385,7 @@ function sortGame(){ G.st={}; sortNext(); }
 function sortNext(){
   const it=sortItem(); G.lock=false;
   G.s={it:it,slots:it.target.map(()=>null),bank:it.tiles.map((t,i)=>({id:i,t:t,used:false}))};
-  $('game').innerHTML=`<div class="qbox"><div class="q-sub">${esc(it.title)}</div>${it.hint?`<div class="q-main">${esc(it.hint)}</div>`:''}</div><div class="slots" id="slots"></div><div class="tiles" id="tiles"></div><div class="fb" id="qfb"></div>`;
+  $('game').innerHTML=`<div class="qbox">${tagHTML(it.subj)}<div class="q-sub">${esc(it.title)}</div>${it.hint?`<div class="q-main">${esc(it.hint)}</div>`:''}</div><div class="slots" id="slots"></div><div class="tiles" id="tiles"></div><div class="fb" id="qfb"></div>`;
   sortDraw();
 }
 function sortDraw(){
@@ -1377,7 +1410,7 @@ function sortCheck(){
     $('qfb').textContent='Chính xác!'; $('qfb').className='fb good';
     judge(true,null); later(sortNext,1200);
   } else {
-    rec(false); sfx.bad(); hit('slots');
+    rec(false); sfx.bad(); applyPenalty(); hit('slots');
     $('qfb').textContent=wrongNote(null,false,false); $('qfb').className='fb bad';
     later(()=>{ s.slots=s.slots.map(()=>null); s.bank.forEach(t=>t.used=false); sortDraw(); $('qfb').textContent=''; G.lock=false; },1000);
   }
@@ -1459,9 +1492,14 @@ function verifyParent(){
   if(parseInt($('parentAns').value,10)===pAns){ closeModal('parentAuth'); if(gateCb){ const f=gateCb; gateCb=null; f(); } else openParentSettings(); }
   else toast('Kết quả chưa đúng, thử lại nhé!');
 }
+function updPenaltyNote(){
+  const v=parseInt($('cfgStars').value,10)||0, on=$('cfgPenalty').checked;
+  $('penaltyNote').textContent=on&&v>0?`Ví dụ: đúng được ${v} sao, sai bị trừ ${Math.ceil(v/2)} sao (số sao không bao giờ xuống dưới 0).`:'Đang tắt: trả lời sai không bị trừ sao.';
+}
 let shopDraft=[];
 function openParentSettings(){
-  $('cfgStars').value=config.starsPerCorrect;
+  $('cfgStars').value=config.starsPerCorrect; $('cfgPenalty').checked=config.penalty!==false;
+  $('cfgStars').oninput=$('cfgPenalty').onchange=updPenaltyNote; updPenaltyNote();
   $('statRows').innerHTML=SUBJ.map(s=>`<tr><td>${SUBJ_NAME[s]}</td><td>${user.stats[s].c}</td><td>${user.stats[s].w}</td></tr>`).join('');
   shopDraft=shop.map(x=>Object.assign({},x)); drawShopEdit();
   ['niTitle','niPrice','niIcon'].forEach(id=>{ $(id).value=''; }); openModal('parentSettings');
@@ -1486,7 +1524,7 @@ function addDraftItem(){
 function saveParent(){
   const v=parseInt($('cfgStars').value,10);
   if($('niTitle').value.trim()||$('niPrice').value.trim()){ if(!addDraftItem()) return; }
-  config.starsPerCorrect=v>0?Math.min(100,v):10;
+  config.starsPerCorrect=v>0?Math.min(100,v):10; config.penalty=$('cfgPenalty').checked;
   shop=shopDraft.map(x=>({id:x.id,title:x.title,price:x.price,icon:x.icon}));
   save(); closeModal('parentSettings'); toast('Đã lưu cài đặt và '+shop.length+' món quà');
 }
@@ -1568,7 +1606,7 @@ function link(){
   const pairs=makePairs(5), n=pairs.length;
   const L=shuffle(pairs.map((p,i)=>({i:i,t:p[0]}))), R=shuffle(pairs.map((p,i)=>({i:i,t:p[1]})));
   G.st={n:n,done:0,miss:0,sel:null};
-  $('game').innerHTML=`<div class="hud"><span id="lkp">Đã ghép: 0/${n}</span><span id="lkm"></span></div><div class="lk-wrap"><div class="lk-col" id="lkL"></div><div class="lk-col" id="lkR"></div></div><div class="fb" id="qfb">Chạm một thẻ bên trái, rồi chạm thẻ cùng cặp bên phải.</div>`;
+  $('game').innerHTML=`${tagHTML(G.curSub)}<div class="hud"><span id="lkp">Đã ghép: 0/${n}</span><span id="lkm"></span></div><div class="lk-wrap"><div class="lk-col" id="lkL"></div><div class="lk-col" id="lkR"></div></div><div class="fb" id="qfb">Chạm một thẻ bên trái, rồi chạm thẻ cùng cặp bên phải.</div>`;
   const mkb=(it,side,box)=>{ const b=document.createElement('button'); b.className='lk'+(it.t.length<=2?' emoji':''); b.textContent=it.t; b.onclick=()=>linkTap(side,it.i,b); $(box).appendChild(b); };
   L.forEach(it=>mkb(it,'L','lkL')); R.forEach(it=>mkb(it,'R','lkR'));
 }
@@ -1585,7 +1623,7 @@ function linkTap(side,i,b){
     st.done++; judge(true,null); $('lkp').textContent=`Đã ghép: ${st.done}/${st.n}`;
     if(st.done===st.n) later(linkEnd,700);
   } else {
-    st.miss++; rec(false); sfx.bad(); wrongNote(null,false,true); $('lkm').textContent='Nhầm: '+st.miss;
+    st.miss++; rec(false); sfx.bad(); applyPenalty(); wrongNote(null,false,true); $('lkm').textContent='Nhầm: '+st.miss;
     [a.el,b].forEach(x=>{ x.classList.remove('shake'); void x.offsetWidth; x.classList.add('shake'); });
   }
 }
@@ -1680,13 +1718,14 @@ function scoreRead(it,heard){
 function cap1(x){ return x.charAt(0).toUpperCase()+x.slice(1); }
 let readSeen=[];
 function readItem(){
+  const sj=nextSub(); G.curSub=sj;
   let it=null;
   for(let t=0;t<30;t++){
     let c;
-    if(subject==='math'){
+    if(sj==='math'){
       const n=grade===1?rnd(1,20):grade===2?rnd(10,99):rnd(100,999);
       c={text:String(n),say:vnNum(n),lang:'vi-VN',num:n,emoji:'',hint:'Đọc số này thành lời'};
-    } else if(subject==='vietnamese'){
+    } else if(sj==='vietnamese'){
       if(grade===1&&Math.random()<.5){ const p=pick(PICS); c={text:p[1],emoji:p[0]}; }
       else {
         let pool;
@@ -1714,7 +1753,7 @@ function readItem(){
       }
       c.say=c.text; c.lang='en-US';
     }
-    c.emoji=c.emoji||''; c.key=c.text;
+    c.emoji=c.emoji||''; c.subj=sj; c.key=c.text;
     it=c; if(!readSeen.includes(c.key)) break;
   }
   readSeen.push(it.key); if(readSeen.length>30) readSeen.shift();
@@ -1734,7 +1773,7 @@ function readNext(){
   $('qno').textContent=`Câu ${st.i+1}/${st.total}`; $('pbar').style.width=(st.i/st.total*100)+'%';
   $('rdSupport').textContent=SR?'':'Phụ huynh chấm';
   const toks=it.text.split(/\s+/);
-  $('rdCard').innerHTML=`<div class="read-card">${it.emoji?`<div class="read-emoji">${esc(it.emoji)}</div>`:''}
+  $('rdCard').innerHTML=`<div class="read-card">${tagHTML(it.subj)}${it.emoji?`<div class="read-emoji">${esc(it.emoji)}</div>`:''}
     <div class="read-text" id="rdText">${toks.map(t=>`<span class="w">${esc(t)}</span>`).join(' ')}</div>
     <div class="q-sub">${esc(it.hint||'Bấm 🔊 nghe mẫu, rồi bấm 🎤 và đọc to nhé')}</div>
     <div class="read-actions"><button class="btn" onclick="readModel()">🔊 Nghe mẫu</button>${SR?'<button class="btn mic" id="micBtn" onclick="readListen()">🎤 Đọc to</button>':''}</div>
