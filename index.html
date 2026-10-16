@@ -1,1 +1,677 @@
-<!DOCTYPE html><html lang="vi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Bé Giỏi Mỗi Ngày</title><style>:root{--primary:#4f46e5;--secondary:#ec4899;--background:#f0fdf4}*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif}body{background-color:var(--background);color:#1f2937;padding-bottom:40px;user-select:none}header{background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}.logo{font-size:1.3rem;font-weight:700}.user-stats{display:flex;align-items:center;gap:8px}.stat-badge{background:rgba(255,255,255,.2);padding:6px 12px;border-radius:20px;font-weight:700}.avatar-circle{width:36px;height:36px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:1.2rem;border:2px solid #fff;overflow:hidden}.avatar-circle img{width:100%;height:100%;object-fit:cover}.container{max-width:800px;margin:20px auto;padding:0 12px}.card{background:#fff;border-radius:20px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,.05);margin-bottom:20px;position:relative}.greeting-card{background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff;padding:16px;border-radius:20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}.nav-tabs{display:flex;gap:8px;margin-bottom:16px}.tab-btn{flex:1;padding:10px;border:none;background:#e2e8f0;font-weight:700;border-radius:12px;cursor:pointer}.tab-btn.active{background:var(--primary);color:#fff}.grade-selector{display:flex;gap:8px;justify-content:center;margin-bottom:16px}.grade-btn{padding:6px 16px;border:2px solid #cbd5e1;border-radius:20px;background:#fff;cursor:pointer;font-weight:700}.grade-btn.active{border-color:var(--primary);background:#e0e7ff;color:var(--primary)}.mode-selector{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px}.mode-btn{padding:8px;border:2px solid #e2e8f0;border-radius:12px;background:#f8fafc;cursor:pointer;font-weight:700;text-align:center;font-size:.85rem}.mode-btn.active{background:var(--secondary);color:#fff;border-color:var(--secondary)}.question-box{text-align:center;margin:20px 0}.question-text{font-size:1.6rem;font-weight:700;margin-bottom:20px}.options-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.option-btn{padding:16px;border:2px solid #e2e8f0;background:#fff;border-radius:14px;font-size:1.2rem;font-weight:700;cursor:pointer}.option-btn.correct{background:#dcfce7!important;border-color:#22c55e!important;color:#15803d!important}.option-btn.wrong{background:#fee2e2!important;border-color:#ef4444!important;color:#b91c1c!important}.hidden{display:none!important}.btn{padding:8px 16px;border:none;border-radius:10px;font-weight:700;cursor:pointer}.btn-primary{background:var(--primary);color:#fff}.btn-secondary{background:#64748b;color:#fff}.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.5);display:flex;justify-content:center;align-items:center;z-index:200}.modal{background:#fff;padding:20px;border-radius:20px;width:90%;max-width:400px}.form-group{margin-bottom:12px}.form-group label{display:block;font-weight:700;margin-bottom:4px}.form-group input{width:100%;padding:8px;border:1px solid #ccc;border-radius:8px}</style></head><body><header><div class="logo">🐝 Bé Giỏi</div><div class="user-stats"><div class="avatar-circle" id="header-avatar" onclick="openAvatarModal()">🧒</div><span id="header-name" style="font-weight:700" onclick="openAvatarModal()">Bé</span><div class="stat-badge">⭐ <span id="star-count">0</span></div></div></header><div class="container"><div class="greeting-card" onclick="openAvatarModal()"><div><h2 id="greeting-title">Xin chào, Bé! 👋</h2><p style="font-size:.9rem">Cùng chăm chỉ học bài để tích sao nhé!</p></div><div style="font-size:1.5rem">✏️</div></div><div class="nav-tabs"><button class="tab-btn active" onclick="selectSubject('math')">🧮 Toán</button><button class="tab-btn" onclick="selectSubject('vietnamese')">📖 Tiếng Việt</button><button class="tab-btn" onclick="selectSubject('english')">🇬🇧 Tiếng Anh</button></div><div id="study-panel" class="card"><div class="grade-selector"><button class="grade-btn active" onclick="selectGrade(1)">Lớp 1</button><button class="grade-btn" onclick="selectGrade(2)">Lớp 2</button><button class="grade-btn" onclick="selectGrade(3)">Lớp 3</button></div><div class="mode-selector"><button class="mode-btn active" onclick="selectMode('quiz')">📝 Làm Bài</button><button class="mode-btn" onclick="selectMode('balloon')">🎈 Bắn Bóng</button><button class="mode-btn" onclick="selectMode('boss')">👾 Đánh Quái</button><button class="mode-btn" onclick="selectMode('race')">🏎️ Đua Xe</button></div><div class="question-box"><div class="question-text" id="question-text">Đang tải câu hỏi...</div><div class="options-grid" id="options-grid"></div></div></div></div><div id="avatar-modal" class="modal-overlay hidden"><div class="modal"><h3>👤 Đổi Tên & Avatar</h3><div class="form-group" style="margin-top:15px"><label>Tên của bé:</label><input type="text" id="edit-name" placeholder="Nhập tên bé..."></div><div class="form-group"><label>Tải ảnh làm Avatar:</label><input type="file" accept="image/*" onchange="uploadAvatar(event)"></div><div style="display:flex;gap:10px;justify-content:flex-end;margin-top:15px"><button class="btn btn-secondary" onclick="closeModal()">Đóng</button><button class="btn btn-primary" onclick="saveProfile()">Lưu</button></div></div></div><script>let userData={stars:0,name:"Bé",avatarImg:null,avatarEmoji:"🧒"},currentSubject="math",currentGrade=1,currentQuestion=null,isAnswering=!1;function saveData(){localStorage.setItem("be_gioi_data",JSON.stringify(userData)),updateUI()}function updateUI(){document.getElementById("star-count").innerText=userData.stars,document.getElementById("header-name").innerText=userData.name,document.getElementById("greeting-title").innerText="Xin chào, "+userData.name+"! 👋";let e=document.getElementById("header-avatar");userData.avatarImg?e.innerHTML='<img src="'+userData.avatarImg+'">':e.innerText=userData.avatarEmoji}function selectSubject(e){currentSubject=e;let t=document.querySelectorAll(".nav-tabs .tab-btn");t.forEach((t,a)=>t.classList.toggle("active","math"===e&&0===a||"vietnamese"===e&&1===a||"english"===e&&2===a)),loadQuestion()}function selectGrade(e){currentGrade=e;let t=document.querySelectorAll(".grade-btn");t.forEach((t,a)=>t.classList.toggle("active",a===e-1)),loadQuestion()}function selectMode(e){let t=document.querySelectorAll(".mode-btn");t.forEach((t,a)=>t.classList.toggle("active","quiz"===e&&0===a||"balloon"===e&&1===a||"boss"===e&&2===a||"race"===e&&3===a)),loadQuestion()}function loadQuestion(){if(isAnswering=!1,"math"===currentSubject){let e=Math.floor(Math.random()*10*currentGrade)+1,t=Math.floor(Math.random()*10*currentGrade)+1,a=e+t,r=[a,a+2,a-1,a+3].sort(()=>Math.random()-.5);currentQuestion={q:e+" + "+t+" = ?",opts:r.map(String),ans:String(a)}}else"vietnamese"===currentSubject?currentQuestion={q:'Điền vần thích hợp: "Con m___"',opts:["èo","ào","êu","iu"],ans:"èo"}:currentQuestion={q:'"Con Mèo" tiếng Anh là gì?',opts:["Cat","Dog","Bird","Fish"],ans:"Cat"};document.getElementById("question-text").innerText=currentQuestion.q;let e=document.getElementById("options-grid");e.innerHTML="",currentQuestion.opts.forEach(t=>{let a=document.createElement("button");a.className="option-btn",a.innerText=t,a.onclick=function(){checkAns(t,a)},e.appendChild(a)})}function checkAns(e,t){isAnswering||(isAnswering=!0,e===currentQuestion.ans?(t.classList.add("correct"),userData.stars+=10,saveData(),setTimeout(loadQuestion,1e3)):(t.classList.add("wrong"),setTimeout(loadQuestion,1500)))}function openAvatarModal(){document.getElementById("edit-name").value=userData.name,document.getElementById("avatar-modal").classList.remove("hidden")}function closeModal(){document.getElementById("avatar-modal").classList.add("hidden")}function uploadAvatar(e){let t=e.target.files[0];if(t){let e=new FileReader;e.onload=function(e){userData.avatarImg=e.target.result},e.readAsDataURL(t)}}function saveProfile(){let e=document.getElementById("edit-name").value.trim();userData.name=e||"Bé",saveData(),closeModal()}window.onload=function(){let e=localStorage.getItem("be_gioi_data");e&&(userData=JSON.parse(e)),updateUI(),loadQuestion()};</script></body></html>
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bé Giỏi Mỗi Ngày - Web Học Tập Tiểu Học</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --secondary: #ec4899;
+      --accent: #f59e0b;
+      --success: #10b981;
+      --danger: #ef4444;
+      --bg: #f0fdf4;
+      --card: #ffffff;
+      --text: #1f2937;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; user-select: none; }
+    body { background-color: var(--bg); color: var(--text); padding-bottom: 40px; }
+    header { background: linear-gradient(135deg, #6366f1, #a855f7); color: white; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .logo { font-size: 1.3rem; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+    .user-stats { display: flex; align-items: center; gap: 8px; }
+    .stat-badge { background: rgba(255,255,255,0.25); backdrop-filter: blur(5px); padding: 6px 12px; border-radius: 20px; font-weight: 800; display: flex; align-items: center; gap: 4px; font-size: 0.95rem; }
+    .btn-icon { background: rgba(255,255,255,0.25); border: none; color: white; padding: 8px; border-radius: 12px; cursor: pointer; font-size: 1.1rem; }
+    .avatar-btn { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.2); padding: 4px 10px 4px 4px; border-radius: 30px; cursor: pointer; }
+    .avatar-circle { width: 36px; height: 36px; border-radius: 50%; background: white; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; border: 2px solid white; overflow: hidden; }
+    .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+    .container { max-width: 800px; margin: 20px auto; padding: 0 12px; }
+    .greeting-card { background: linear-gradient(135deg, #a855f7, #ec4899); color: white; padding: 16px 20px; border-radius: 20px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; box-shadow: 0 8px 16px rgba(236, 72, 153, 0.2); }
+    .nav-tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+    .tab-btn { flex: 1; padding: 12px 8px; border: none; background: #e2e8f0; color: #475569; font-weight: 800; border-radius: 14px; cursor: pointer; font-size: 0.95rem; }
+    .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+    .card { background: var(--card); border-radius: 24px; padding: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); margin-bottom: 20px; position: relative; }
+    .grade-bar { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; }
+    .grade-btn { padding: 6px 16px; border: 2px solid #cbd5e1; border-radius: 20px; background: white; cursor: pointer; font-weight: 800; color: #64748b; }
+    .grade-btn.active { border-color: var(--primary); background: #e0e7ff; color: var(--primary); }
+    .mode-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 20px; }
+    @media (max-width: 500px) { .mode-bar { grid-template-columns: repeat(2, 1fr); } }
+    .mode-btn { padding: 10px 4px; border: 2px solid #e2e8f0; border-radius: 12px; background: #f8fafc; cursor: pointer; font-weight: 800; text-align: center; font-size: 0.85rem; color: #475569; }
+    .mode-btn.active { background: var(--secondary); color: white; border-color: var(--secondary); }
+    
+    /* MODES & GAME ARENAS */
+    .question-box { text-align: center; margin: 15px 0; }
+    .question-text { font-size: 1.6rem; font-weight: 900; color: #1e293b; margin-bottom: 20px; min-height: 50px; display: flex; align-items: center; justify-content: center; }
+    .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    @media (max-width: 500px) { .options-grid { grid-template-columns: 1fr; } }
+    .option-btn { padding: 16px; border: 2px solid #e2e8f0; background: white; border-radius: 16px; font-size: 1.15rem; font-weight: 800; cursor: pointer; color: #334155; }
+    .option-btn.correct { background: #dcfce7 !important; border-color: #22c55e !important; color: #15803d !important; }
+    .option-btn.wrong { background: #fee2e2 !important; border-color: #ef4444 !important; color: #b91c1c !important; }
+
+    .balloon-arena { height: 260px; background: linear-gradient(to bottom, #bae6fd, #e0f2fe); border-radius: 16px; position: relative; overflow: hidden; border: 2px dashed #0284c7; }
+    .balloon { position: absolute; width: 70px; height: 85px; border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 900; font-size: 1.1rem; cursor: pointer; box-shadow: inset -4px -4px 8px rgba(0,0,0,0.15); }
+    .balloon.popped { transform: scale(0); opacity: 0; transition: all 0.2s; }
+
+    .boss-arena { background: linear-gradient(135deg, #1e1b4b, #311b92); border-radius: 16px; padding: 16px; color: white; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .fighter { text-align: center; width: 42%; }
+    .fighter-avatar { font-size: 3rem; height: 60px; display: flex; align-items: center; justify-content: center; }
+    .hp-bar-bg { background: rgba(255,255,255,0.2); height: 12px; border-radius: 10px; overflow: hidden; margin-top: 4px; }
+    .hp-bar-fill { height: 100%; background: #22c55e; width: 100%; transition: width 0.3s; }
+
+    .race-track { background: #334155; border-radius: 16px; padding: 12px 8px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
+    .lane { background: #475569; height: 44px; border-radius: 22px; position: relative; border: 2px dashed #94a3b8; }
+    .car-runner { position: absolute; top: 50%; transform: translateY(-50%); left: 0%; transition: left 0.4s; display: flex; align-items: center; gap: 4px; }
+    .finish-line { position: absolute; right: 12px; top: 0; bottom: 0; width: 6px; background: repeating-linear-gradient(0deg, #fff, #fff 6px, #000 6px, #000 12px); }
+
+    /* MODALS */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 200; backdrop-filter: blur(3px); }
+    .modal { background: white; border-radius: 24px; padding: 20px; width: 90%; max-width: 450px; max-height: 90vh; overflow-y: auto; }
+    .form-group { margin-bottom: 14px; text-align: left; }
+    .form-group label { display: block; font-weight: 800; margin-bottom: 4px; font-size: 0.9rem; }
+    .form-group input { width: 100%; padding: 10px; border: 1.5px solid #cbd5e1; border-radius: 10px; font-size: 0.95rem; font-weight: 700; }
+    .btn { padding: 10px 18px; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: #64748b; color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .hidden { display: none !important; }
+    .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .shop-card { border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px; text-align: center; background: #fafafa; display: flex; flex-direction: column; justify-content: space-between; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">🐝 Bé Giỏi</div>
+    <div class="user-stats">
+      <div class="avatar-btn" onclick="openModal('avatar-modal')">
+        <div class="avatar-circle" id="header-avatar">🧒</div>
+        <span id="header-name" style="font-weight: 800; font-size: 0.95rem;">Bé</span>
+      </div>
+      <div class="stat-badge">⭐ <span id="star-count">0</span></div>
+      <button class="btn-icon" onclick="switchView('shop')">🛒</button>
+      <button class="btn-icon" onclick="switchView('vault')">🎁</button>
+      <button class="btn-icon" onclick="openParentModal()">⚙️</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="greeting-card" onclick="openModal('avatar-modal')">
+      <div>
+        <h2 id="greeting-title">Xin chào, Bé! 👋</h2>
+        <p style="font-size: 0.85rem; opacity: 0.9; margin-top: 2px;">Cùng học bài thật chăm để tích sao nhé!</p>
+      </div>
+      <div style="font-size: 1.6rem;">✏️</div>
+    </div>
+
+    <div class="nav-tabs">
+      <button class="tab-btn active" id="tab-math" onclick="selectSubject('math')">🧮 Toán</button>
+      <button class="tab-btn" id="tab-vietnamese" onclick="selectSubject('vietnamese')">📖 Tiếng Việt</button>
+      <button class="tab-btn" id="tab-english" onclick="selectSubject('english')">🇬🇧 Tiếng Anh</button>
+    </div>
+
+    <!-- KHU VỰC HỌC CÍNH -->
+    <div id="study-panel" class="card">
+      <div class="grade-bar">
+        <button class="grade-btn active" id="grade-1" onclick="selectGrade(1)">Lớp 1</button>
+        <button class="grade-btn" id="grade-2" onclick="selectGrade(2)">Lớp 2</button>
+        <button class="grade-btn" id="grade-3" onclick="selectGrade(3)">Lớp 3</button>
+      </div>
+
+      <div class="mode-bar">
+        <button class="mode-btn active" id="mode-quiz" onclick="selectMode('quiz')">📝 Làm Bài</button>
+        <button class="mode-btn" id="mode-balloon" onclick="selectMode('balloon')">🎈 Bắn Bóng</button>
+        <button class="mode-btn" id="mode-boss" onclick="selectMode('boss')">👾 Đánh Quái</button>
+        <button class="mode-btn" id="mode-race" onclick="selectMode('race')">🏎️ Đua Xe</button>
+      </div>
+
+      <!-- ĐÁNH QUÁI -->
+      <div id="boss-arena" class="boss-arena hidden">
+        <div class="fighter">
+          <div class="fighter-avatar" id="hero-avatar-display">🧒</div>
+          <strong id="hero-name-display">Minh Khôi</strong>
+          <div style="color: #ef4444; font-size: 0.9rem; margin-top: 2px;" id="hero-hearts">❤️❤️❤️</div>
+        </div>
+        <div style="font-size: 1.5rem; font-weight: 900; color: #f59e0b;">VS</div>
+        <div class="fighter">
+          <div class="fighter-avatar" id="boss-avatar-display">👹</div>
+          <strong id="boss-name-display">Ma Lém Lỉnh</strong>
+          <div class="hp-bar-bg"><div class="hp-bar-fill" id="boss-hp-fill"></div></div>
+        </div>
+      </div>
+
+      <!-- ĐƯỜNG ĐUA XE -->
+      <div id="race-track" class="race-track hidden">
+        <div class="lane">
+          <div class="car-runner" id="player-car" style="left: 0%;">
+            <span style="font-size: 1.5rem;">🏎️</span>
+            <span id="player-car-name" style="color: white; font-size: 0.7rem; background: rgba(0,0,0,0.6); padding: 1px 4px; border-radius: 8px;">Bé</span>
+          </div>
+          <div class="finish-line"></div>
+        </div>
+        <div class="lane">
+          <div class="car-runner" id="enemy-car" style="left: 0%;">
+            <span style="font-size: 1.5rem;">🏎️</span>
+            <span style="color: white; font-size: 0.7rem; background: rgba(0,0,0,0.6); padding: 1px 4px; border-radius: 8px;">Đối Thủ</span>
+          </div>
+          <div class="finish-line"></div>
+        </div>
+      </div>
+
+      <!-- CÂU HỎI & ĐÁP ÁN -->
+      <div id="question-container" class="question-box">
+        <div class="question-text" id="question-text">Đang tải câu hỏi...</div>
+        <div class="options-grid" id="options-grid"></div>
+      </div>
+
+      <!-- BÓNG BAY -->
+      <div id="balloon-arena" class="balloon-arena hidden"></div>
+    </div>
+
+    <!-- CỬA HÀNG -->
+    <div id="shop-panel" class="card hidden">
+      <h2 style="margin-bottom: 16px;">🛒 Cửa Hàng Đổi Thưởng</h2>
+      <div class="shop-grid" id="shop-grid"></div>
+    </div>
+
+    <!-- TỦ ĐỒ -->
+    <div id="vault-panel" class="card hidden">
+      <h2 style="margin-bottom: 12px;">🎁 Tủ Đồ Quà Đã Đổi</h2>
+      <div id="vault-list"></div>
+    </div>
+  </div>
+
+  <!-- MODAL EDIT AVATAR -->
+  <div id="avatar-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3 style="margin-bottom: 12px;">👤 Đổi Tên & Ảnh Đại Diện</h3>
+      <div class="form-group">
+        <label>Tên của bé:</label>
+        <input type="text" id="edit-name" maxlength="16" placeholder="Nhập tên bé...">
+      </div>
+      <div class="form-group">
+        <label>📷 Tải ảnh cá nhân từ máy:</label>
+        <input type="file" accept="image/*" onchange="uploadCustomAvatar(event)">
+      </div>
+      <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 16px;">
+        <button class="btn btn-secondary" onclick="closeModal('avatar-modal')">Hủy</button>
+        <button class="btn btn-primary" onclick="saveAvatarProfile()">Lưu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PHỤ HUYNH -->
+  <div id="parent-auth-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3 style="margin-bottom: 12px;">🔒 Xác Nhận Phụ Huynh</h3>
+      <div class="question-text" id="parent-problem"></div>
+      <div class="form-group">
+        <input type="number" id="parent-ans" placeholder="Nhập kết quả...">
+      </div>
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button class="btn btn-secondary" onclick="closeModal('parent-auth-modal')">Hủy</button>
+        <button class="btn btn-primary" onclick="verifyParent()">Xác Nhận</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="parent-settings-modal" class="modal-overlay hidden">
+    <div class="modal">
+      <h3 style="margin-bottom: 12px;">⚙️ Cài Đặt Phụ Huynh</h3>
+      <div class="form-group">
+        <label>Sao thưởng mỗi câu đúng:</label>
+        <input type="number" id="cfg-stars" min="1" max="100">
+      </div>
+      <hr style="margin: 12px 0;">
+      <h4 style="margin-bottom: 8px;">➕ Thêm Quà Đổi Mới</h4>
+      <div class="form-group"><input type="text" id="new-item-title" placeholder="Tên món quà..."></div>
+      <div class="form-group"><input type="number" id="new-item-price" placeholder="Số sao cần..."></div>
+      <div style="display: flex; gap: 8px; justify-content: space-between; margin-top: 16px;">
+        <button class="btn btn-danger" onclick="resetAllData()">🗑️ Reset Dữ Liệu</button>
+        <button class="btn btn-primary" onclick="saveParentSettings()">Lưu Cấu Hình</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DỮ LIỆU KHỞI TẠO CHUẨN
+    let userData = { stars: 0, name: "Bé", avatarImg: null, avatarEmoji: "🧒", vault: [] };
+    let config = { starsPerCorrect: 10 };
+    let currentSubject = 'math';
+    let currentGrade = 1;
+    let currentMode = 'quiz';
+    let currentQuestion = null;
+    let isAnswering = false;
+
+    // ĐÁNH QUÁI
+    const bosses = [
+      { name: "Ma Lém Lỉnh", emoji: "👹", hp: 3, maxHp: 3 },
+      { name: "Bạch Tuộc Khổng Lồ", emoji: "🐙", hp: 4, maxHp: 4 },
+      { name: "Khủng Long Bạo Chúa", emoji: "🦖", hp: 5, maxHp: 5 }
+    ];
+    let bossIdx = 0;
+    let heroHearts = 3;
+
+    // ĐUA XE
+    let playerPos = 0, enemyPos = 0, raceTimer = null;
+
+    let shopItems = [
+      { id: 1, title: 'Kem Lotteria', price: 30, icon: '🍦' },
+      { id: 2, title: 'Bộ Bút Màu 36 Món', price: 50, icon: '🎨' },
+      { id: 3, title: 'Xem TV 30 Phút', price: 40, icon: '📺' },
+      { id: 4, title: 'Đồ Chơi Lego', price: 100, icon: '🧩' }
+    ];
+
+    // CHẠY NGAY KHI TRANG TẢI
+    window.addEventListener('DOMContentLoaded', function() {
+      try {
+        let savedUser = localStorage.getItem('be_gioi_user');
+        if (savedUser) userData = { ...userData, ...JSON.parse(savedUser) };
+
+        let savedConfig = localStorage.getItem('be_gioi_config');
+        if (savedConfig) config = { ...config, ...JSON.parse(savedConfig) };
+
+        let savedShop = localStorage.getItem('be_gioi_shop');
+        if (savedShop) shopItems = JSON.parse(savedShop);
+      } catch (e) {
+        console.warn("Dữ liệu cũ lỗi, dùng mặc định:", e);
+      }
+
+      updateUI();
+      loadNextQuestion();
+    });
+
+    function saveData() {
+      try {
+        localStorage.setItem('be_gioi_user', JSON.stringify(userData));
+        localStorage.setItem('be_gioi_config', JSON.stringify(config));
+        localStorage.setItem('be_gioi_shop', JSON.stringify(shopItems));
+      } catch (e) {}
+      updateUI();
+    }
+
+    function updateUI() {
+      document.getElementById('star-count').innerText = userData.stars;
+      document.getElementById('header-name').innerText = userData.name;
+      document.getElementById('greeting-title').innerText = 'Xin chào, ' + userData.name + '! 👋';
+
+      let av = document.getElementById('header-avatar');
+      if (userData.avatarImg) {
+        av.innerHTML = '<img src="' + userData.avatarImg + '">';
+      } else {
+        av.innerText = userData.avatarEmoji;
+      }
+
+      let heroAv = document.getElementById('hero-avatar-display');
+      if (userData.avatarImg) {
+        heroAv.innerHTML = '<img src="' + userData.avatarImg + '" style="width:50px;height:50px;border-radius:50%;">';
+      } else {
+        heroAv.innerText = userData.avatarEmoji;
+      }
+      document.getElementById('hero-name-display').innerText = userData.name;
+      document.getElementById('player-car-name').innerText = userData.name;
+    }
+
+    function switchView(view) {
+      document.getElementById('study-panel').classList.add('hidden');
+      document.getElementById('shop-panel').classList.add('hidden');
+      document.getElementById('vault-panel').classList.add('hidden');
+
+      if (view === 'study') document.getElementById('study-panel').classList.remove('hidden');
+      else if (view === 'shop') { renderShop(); document.getElementById('shop-panel').classList.remove('hidden'); }
+      else if (view === 'vault') { renderVault(); document.getElementById('vault-panel').classList.remove('hidden'); }
+    }
+
+    function selectSubject(subj) {
+      currentSubject = subj;
+      document.querySelectorAll('.nav-tabs .tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + subj).classList.add('active');
+      switchView('study');
+      loadNextQuestion();
+    }
+
+    function selectGrade(g) {
+      currentGrade = g;
+      document.querySelectorAll('.grade-bar .grade-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('grade-' + g).classList.add('active');
+      loadNextQuestion();
+    }
+
+    function selectMode(m) {
+      currentMode = m;
+      document.querySelectorAll('.mode-bar .mode-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('mode-' + m).classList.add('active');
+
+      document.getElementById('boss-arena').classList.toggle('hidden', m !== 'boss');
+      document.getElementById('race-track').classList.toggle('hidden', m !== 'race');
+      document.getElementById('question-container').classList.toggle('hidden', m === 'balloon');
+      document.getElementById('balloon-arena').classList.toggle('hidden', m !== 'balloon');
+
+      if (m === 'race') startRace(); else stopRace();
+      if (m === 'boss') updateBossUI();
+
+      loadNextQuestion();
+    }
+
+    // PHÁT SINH BÀI TẬP BẮT BUỘC KHÔNG BỊ TREO
+    function loadNextQuestion() {
+      isAnswering = false;
+      let qText = '', ans = '', opts = [];
+
+      if (currentSubject === 'math') {
+        let a = Math.floor(Math.random() * (currentGrade * 8)) + 1;
+        let b = Math.floor(Math.random() * (currentGrade * 8)) + 1;
+        let isAdd = Math.random() > 0.5;
+        if (isAdd) {
+          qText = a + ' + ' + b + ' = ?';
+          ans = String(a + b);
+        } else {
+          a = Math.max(a, b); b = Math.min(a, b);
+          qText = a + ' - ' + b + ' = ?';
+          ans = String(a - b);
+        }
+        opts = [ans];
+        while (opts.length < 4) {
+          let rand = String(parseInt(ans) + Math.floor(Math.random() * 7) - 3);
+          if (parseInt(rand) >= 0 && !opts.includes(rand)) opts.push(rand);
+        }
+        opts.sort(() => Math.random() - 0.5);
+      } else if (currentSubject === 'vietnamese') {
+        let pool = [
+          { q: 'Từ nào viết đúng chính tả?', opts: ['Sinh sống', 'Xinh sống', 'Sinh xống', 'Xinh xống'], ans: 'Sinh sống' },
+          { q: 'Điền vần thích hợp: "Con m___"', opts: ['èo', 'ào', 'êu', 'iu'], ans: 'èo' },
+          { q: 'Từ nào chỉ hoạt động?', opts: ['Chạy bộ', 'Cái bàn', 'Xinh đẹp', 'Mặt trời'], ans: 'Chạy bộ' }
+        ];
+        let item = pool[Math.floor(Math.random() * pool.length)];
+        qText = item.q; opts = item.opts; ans = item.ans;
+      } else {
+        let pool = [
+          { q: '"Con Mèo" tiếng Anh là gì?', opts: ['Cat', 'Dog', 'Bird', 'Fish'], ans: 'Cat' },
+          { q: 'Màu "Đỏ" tiếng Anh là gì?', opts: ['Red', 'Blue', 'Green', 'Yellow'], ans: 'Red' },
+          { q: 'Số "5" tiếng Anh là gì?', opts: ['Five', 'Four', 'Six', 'Three'], ans: 'Five' }
+        ];
+        let item = pool[Math.floor(Math.random() * pool.length)];
+        qText = item.q; opts = item.opts; ans = item.ans;
+      }
+
+      currentQuestion = { q: qText, opts: opts, ans: ans };
+      renderQuestionUI();
+    }
+
+    function renderQuestionUI() {
+      document.getElementById('question-text').innerText = currentQuestion.q;
+
+      if (currentMode === 'balloon') {
+        renderBalloons();
+      } else {
+        let grid = document.getElementById('options-grid');
+        grid.innerHTML = '';
+        currentQuestion.opts.forEach(opt => {
+          let btn = document.createElement('button');
+          btn.className = 'option-btn';
+          btn.innerText = opt;
+          btn.onclick = function() { checkAnswer(opt, btn); };
+          grid.appendChild(btn);
+        });
+      }
+    }
+
+    function checkAnswer(selected, btn) {
+      if (isAnswering) return;
+      isAnswering = true;
+
+      let isCorrect = (selected === currentQuestion.ans);
+
+      if (isCorrect) {
+        if (btn) btn.classList.add('correct');
+        userData.stars += config.starsPerCorrect;
+        playBeep(600, 200);
+
+        if (currentMode === 'boss') damageBoss();
+        if (currentMode === 'race') advancePlayer();
+      } else {
+        if (btn) btn.classList.add('wrong');
+        playBeep(200, 300);
+
+        if (currentMode === 'boss') damageHero();
+        if (currentMode === 'race') enemyAdvance();
+      }
+
+      saveData();
+      setTimeout(loadNextQuestion(), isCorrect ? 1000 : 1600);
+    }
+
+    // GAME BẮN BÓNG
+    function renderBalloons() {
+      let arena = document.getElementById('balloon-arena');
+      arena.innerHTML = '';
+      let colors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b'];
+
+      currentQuestion.opts.forEach((opt, idx) => {
+        let b = document.createElement('div');
+        b.className = 'balloon';
+        b.innerText = opt;
+        b.style.backgroundColor = colors[idx % colors.length];
+        b.style.left = (12 + idx * 22) + '%';
+        b.style.bottom = '-90px';
+
+        b.onclick = function() {
+          if (b.classList.contains('popped')) return;
+          b.classList.add('popped');
+          checkAnswer(opt, null);
+        };
+
+        arena.appendChild(b);
+
+        let pos = -90;
+        let speed = 1 + currentGrade * 0.4;
+        let anim = setInterval(() => {
+          pos += speed;
+          b.style.bottom = pos + 'px';
+          if (pos > 270) {
+            clearInterval(anim);
+            if (opt === currentQuestion.ans && !b.classList.contains('popped')) {
+              renderBalloons();
+            }
+          }
+        }, 30);
+      });
+    }
+
+    // GAME ĐÁNH QUÁI
+    function damageBoss() {
+      let b = bosses[bossIdx];
+      b.hp--;
+      updateBossUI();
+      if (b.hp <= 0) {
+        userData.stars += config.starsPerCorrect * 2;
+        alert('Chúc mừng bé đã đánh gục ' + b.name + '! Thưởng + ' + (config.starsPerCorrect * 2) + ' ⭐');
+        b.hp = b.maxHp;
+        bossIdx = (bossIdx + 1) % bosses.length;
+        updateBossUI();
+      }
+    }
+
+    function damageHero() {
+      heroHearts--;
+      updateBossUI();
+      if (heroHearts <= 0) {
+        alert('Bé hết tim rồi! Trận đấu bắt đầu lại nhé!');
+        heroHearts = 3;
+        bosses[bossIdx].hp = bosses[bossIdx].maxHp;
+        updateBossUI();
+      }
+    }
+
+    function updateBossUI() {
+      let b = bosses[bossIdx];
+      document.getElementById('boss-avatar-display').innerText = b.emoji;
+      document.getElementById('boss-name-display').innerText = b.name;
+      document.getElementById('boss-hp-fill').style.width = (b.hp / b.maxHp * 100) + '%';
+      document.getElementById('hero-hearts').innerText = '❤️'.repeat(Math.max(0, heroHearts));
+    }
+
+    // GAME ĐUA XE
+    function startRace() {
+      stopRace();
+      playerPos = 0; enemyPos = 0;
+      updateRaceCars();
+      raceTimer = setInterval(() => {
+        if (!isAnswering && currentMode === 'race') {
+          enemyPos += 1;
+          updateRaceCars();
+          if (enemyPos >= 88) {
+            stopRace();
+            alert('Đối thủ về đích trước rồi! Đua lại nhé!');
+            startRace();
+          }
+        }
+      }, 800);
+    }
+
+    function stopRace() { if (raceTimer) clearInterval(raceTimer); }
+    function advancePlayer() {
+      playerPos += 16;
+      updateRaceCars();
+      if (playerPos >= 88) {
+        stopRace();
+        userData.stars += config.starsPerCorrect * 3;
+        alert('🏆 BÉ ĐÃ VỀ ĐÍCH THẮNG CUỘC! Thưởng +' + (config.starsPerCorrect * 3) + ' ⭐');
+        startRace();
+      }
+    }
+    function enemyAdvance() { enemyPos += 8; updateRaceCars(); }
+    function updateRaceCars() {
+      document.getElementById('player-car').style.left = Math.min(88, playerPos) + '%';
+      document.getElementById('enemy-car').style.left = Math.min(88, enemyPos) + '%';
+    }
+
+    // SHOP & VAULT
+    function renderShop() {
+      let grid = document.getElementById('shop-grid');
+      grid.innerHTML = '';
+      shopItems.forEach(item => {
+        let card = document.createElement('div');
+        card.className = 'shop-card';
+        card.innerHTML = `
+          <div style="font-size:2.5rem;">${item.icon}</div>
+          <strong style="margin:4px 0;">${item.title}</strong>
+          <div style="color:var(--accent);font-weight:bold;margin-bottom:8px;">⭐ ${item.price} Sao</div>
+          <button class="btn btn-primary" ${userData.stars < item.price ? 'disabled' : ''} onclick="buyItem(${item.id})">Đổi Quà</button>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function buyItem(id) {
+      let item = shopItems.find(i => i.id === id);
+      if (item && userData.stars >= item.price) {
+        userData.stars -= item.price;
+        userData.vault.push({ title: item.title, icon: item.icon, date: new Date().toLocaleDateString('vi-VN') });
+        saveData();
+        renderShop();
+        alert('Bé đổi thành công: ' + item.title + '!');
+      }
+    }
+
+    function renderVault() {
+      let list = document.getElementById('vault-list');
+      list.innerHTML = '';
+      if (userData.vault.length === 0) {
+        list.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:20px;">Chưa có quà nào trong tủ đồ.</p>';
+        return;
+      }
+      userData.vault.forEach((item, idx) => {
+        let div = document.createElement('div');
+        div.style = "display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid #eee;";
+        div.innerHTML = `
+          <div><span style="font-size:1.5rem;margin-right:8px;">${item.icon}</span><strong>${item.title}</strong></div>
+          <button class="btn btn-secondary" onclick="claimGift(${idx})">Đã Nhận</button>
+        `;
+        list.appendChild(div);
+      });
+    }
+
+    function claimGift(idx) {
+      if (confirm('Phụ huynh xác nhận đã trao quà cho bé?')) {
+        userData.vault.splice(idx, 1);
+        saveData();
+        renderVault();
+      }
+    }
+
+    // EDIT AVATAR
+    function uploadCustomAvatar(e) {
+      let file = e.target.files[0];
+      if (file) {
+        let reader = new FileReader();
+        reader.onload = function(evt) {
+          userData.avatarImg = evt.target.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function saveAvatarProfile() {
+      let name = document.getElementById('edit-name').value.trim();
+      userData.name = name ? name : 'Bé';
+      saveData();
+      closeModal('avatar-modal');
+    }
+
+    // PARENT
+    let parentProblemAns = 0;
+    function openParentModal() {
+      let a = Math.floor(Math.random() * 20) + 10;
+      let b = Math.floor(Math.random() * 20) + 10;
+      parentProblemAns = a + b;
+      document.getElementById('parent-problem').innerText = a + ' + ' + b + ' = ?';
+      document.getElementById('parent-ans').value = '';
+      openModal('parent-auth-modal');
+    }
+
+    function verifyParent() {
+      if (parseInt(document.getElementById('parent-ans').value) === parentProblemAns) {
+        closeModal('parent-auth-modal');
+        document.getElementById('cfg-stars').value = config.starsPerCorrect;
+        openModal('parent-settings-modal');
+      } else alert('Kết quả chưa đúng!');
+    }
+
+    function saveParentSettings() {
+      config.starsPerCorrect = parseInt(document.getElementById('cfg-stars').value) || 10;
+      let title = document.getElementById('new-item-title').value.trim();
+      let price = parseInt(document.getElementById('new-item-price').value);
+      if (title && price > 0) shopItems.push({ id: Date.now(), title: title, price: price, icon: '🎁' });
+      saveData();
+      closeModal('parent-settings-modal');
+    }
+
+    function resetAllData() {
+      if (confirm('Xóa sạch dữ liệu bài học?')) {
+        localStorage.clear();
+        location.reload();
+      }
+    }
+
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    function playBeep(freq, duration) {
+      try {
+        let ctx = new (window.AudioContext || window.webkitAudioContext)();
+        let osc = ctx.createOscillator();
+        osc.frequency.value = freq;
+        osc.connect(ctx.destination);
+        osc.start();
+        setTimeout(() => { osc.stop(); ctx.close(); }, duration);
+      } catch (e) {}
+    }
+  </script>
+</body>
+</html>
+```
+
+### ✨ Điểm khác biệt quan trọng đã được khắc phục:
+1. **Khắc phục lỗi treo "Đang tải câu hỏi...":** Hàm `loadNextQuestion()` sử dụng sự kiện `DOMContentLoaded` kết hợp khối `try...catch` an toàn, khởi tạo dữ liệu câu hỏi và đáp án **ngay lập tức** dù trình duyệt có lưu `localStorage` hay không.
+2. **Cấu trúc gọn nhẹ:** Toàn bộ ứng dụng (chế độ học, trò chơi, âm thanh Web Audio, avatar tải ảnh, tủ đồ) gom trong 1 file duy nhất.
+3. **Cách cập nhật lên GitHub Pages:** Bạn copy toàn bộ mã trong file `index.html` ở trên, dán đè vào file trên GitHub và bấm **Commit changes**. Sau 15-20 giây, mở lại trang `https://tranhuy181118.github.io/be-gioi-lop-123/` là web app sẽ chạy mượt mà ngay lập tức!
