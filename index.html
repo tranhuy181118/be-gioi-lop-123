@@ -79,9 +79,10 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--pencil);outline
 .grade{flex:1;border:2.5px solid var(--line);border-radius:var(--r-s);background:var(--card-2);padding:6px;font:800 1rem var(--font-display)}
 .grade.on{background:var(--ink);color:var(--card)}
 .modes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.mode{border:2.5px solid var(--line);border-radius:var(--r-m);background:var(--card-2);padding:8px 2px 6px;display:flex;flex-direction:column;align-items:center;gap:0;font-weight:800;font-size:.78rem;line-height:1.15}
-.mode b{font-size:1.5rem;line-height:1.2;font-weight:400}
-.mode.on{background:var(--red);border-color:var(--red);color:#fff}
+.mode{--mc:#2f6fe0;border:2.5px solid rgba(0,0,0,.28);border-radius:var(--r-m);background:var(--mc);color:#fff;padding:8px 2px 6px;display:flex;flex-direction:column;align-items:center;gap:0;font-weight:800;font-size:.78rem;line-height:1.15;box-shadow:0 3px 0 rgba(0,0,0,.28);text-shadow:0 1px 0 rgba(0,0,0,.25);transition:transform .12s}
+.mode b{font-size:1.5rem;line-height:1.2;font-weight:400;text-shadow:none}
+.mode:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.28)}
+.mode.on{transform:translateY(-2px) scale(1.06);border-color:#fff;box-shadow:0 0 0 3px var(--mc),0 6px 12px rgba(0,0,0,.3);position:relative;z-index:1}
 .note{margin:10px 2px 14px;font-size:.9rem;color:var(--ink-soft);font-weight:700;min-height:1.2em}
 
 /* ===== Câu hỏi ===== */
@@ -816,8 +817,9 @@ const MODES=[
 ];
 const MODE_FN={quiz:()=>quiz(),balloon:()=>balloon(),boss:()=>boss(),race:()=>race(),memory:()=>memory(),speed:()=>speed(),sort:()=>sortGame(),read:()=>readMode(),mole:()=>mole(),link:()=>link(),fish:()=>fishing()};
 
+const MODE_COLORS={quiz:'#2f6fe0',read:'#d9363e',balloon:'#e8590c',boss:'#7048e8',race:'#0b7285',memory:'#c2255c',speed:'#c77700',sort:'#2b8a3e',mole:'#8d5524',link:'#9c36b5',fish:'#1098ad'};
 function drawModes(){
-  $('modes').innerHTML=MODES.map(m=>`<button class="mode ${m[0]===mode?'on':''}" onclick="selectMode('${m[0]}')"><b>${m[1]}</b>${m[2]}</button>`).join('');
+  $('modes').innerHTML=MODES.map(m=>`<button class="mode ${m[0]===mode?'on':''}" style="--mc:${MODE_COLORS[m[0]]||'#2f6fe0'}" onclick="selectMode('${m[0]}')"><b>${m[1]}</b>${m[2]}</button>`).join('');
   const cur=MODES.find(m=>m[0]===mode); $('modeNote').textContent=cur?cur[3]:'';
 }
 function selectSubject(s){
