@@ -199,6 +199,9 @@ table{width:100%;border-collapse:collapse;font-size:.95rem;margin:6px 0 10px}
 th,td{border-bottom:2px dashed var(--grid);padding:6px 4px;text-align:left}
 .mini{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 0;border-bottom:2px dashed var(--grid)}
 .mini button{border:2px solid var(--red);color:var(--red);background:transparent;border-radius:8px;padding:2px 8px;font-weight:800}
+.mini button.edit{border-color:var(--ink-soft);color:var(--ink-soft);margin-left:auto}
+.mini .ed{display:flex;gap:4px;flex:1;min-width:0}
+.mini .ed input{min-width:0;padding:4px 6px}
 
 .gain.loss{background:var(--red)!important;color:#fff!important;border-color:#8f1f27!important}
 .gain{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:300;background:var(--pencil);color:#3a2a00;border:3px solid #3a2a00;border-radius:30px;padding:6px 18px;font:800 1.3rem var(--font-display);animation:floatUp 1s ease-out forwards;pointer-events:none}
@@ -294,6 +297,10 @@ th,td{border-bottom:2px dashed var(--grid);padding:6px 4px;text-align:left}
 
 /* ===== Câu cá ===== */
 .pond{position:relative;height:300px;overflow:hidden;border:var(--bw) solid var(--line);border-radius:var(--r-l);background:linear-gradient(#aee6ff,#2f8fd8);margin-top:6px}
+.tpic{position:relative;display:grid;grid-template-columns:repeat(3,1fr);width:min(100%,240px);aspect-ratio:1;margin:0 auto 10px;border:var(--bw) solid var(--line);border-radius:var(--r-m);overflow:hidden;background:var(--card)}
+.tpic>em{position:absolute;inset:0;display:grid;place-items:center;font-size:7rem;font-style:normal}
+.tpic>i{position:relative;display:grid;place-items:center;background:var(--line);color:#fff;font:800 1.5rem var(--font-display);border:1px solid var(--card);transition:opacity .4s}
+.tpic>i.open{opacity:0}
 .fish{position:absolute;left:0;width:150px;height:56px;display:flex;align-items:center;gap:6px;padding:0 12px;border:none;border-radius:30px;background:#ff9f43;color:#3a1f00;font:800 1rem/1.1 var(--font-display);box-shadow:0 3px 0 rgba(0,0,0,.25);animation:swim linear infinite alternate;text-align:left}
 .fish span{font-size:1.5rem}
 .fish b{font-weight:800;word-break:break-word}
@@ -1057,11 +1064,13 @@ const MODES=[
   ['sort','🔤','Sắp xếp','Chạm các thẻ theo đúng thứ tự.'],
   ['mole','🔨','Đập chuột','Chạm vào chú chuột đang ló lên mang đáp án đúng. Sai hoặc để lỡ sẽ mất tim.'],
   ['link','🔗','Ghép đôi','Chạm một thẻ bên trái rồi chạm thẻ cùng cặp bên phải.'],
-  ['fish','🎣','Câu cá','Chạm vào con cá mang đáp án đúng. Chọn sai sẽ mất tim.']
+  ['fish','🎣','Câu cá','Chạm vào con cá mang đáp án đúng. Chọn sai sẽ mất tim.'],
+  ['tiles','🖼️','Lật tranh','Trả lời đúng để mở từng ô của bức tranh bí mật. Mở hết để đoán tranh và nhận thưởng.'],
+  ['bucket','🧺','Phân loại','Xem thẻ rồi chọn đúng nhóm: số chẵn/lẻ, con vật/đồ vật, Animal/Fruit.']
 ];
-const MODE_FN={quiz:()=>quiz(),balloon:()=>balloon(),boss:()=>boss(),race:()=>race(),memory:()=>memory(),speed:()=>speed(),sort:()=>sortGame(),read:()=>readMode(),mole:()=>mole(),link:()=>link(),fish:()=>fishing()};
+const MODE_FN={quiz:()=>quiz(),balloon:()=>balloon(),boss:()=>boss(),race:()=>race(),memory:()=>memory(),speed:()=>speed(),sort:()=>sortGame(),read:()=>readMode(),mole:()=>mole(),link:()=>link(),fish:()=>fishing(),tiles:()=>tiles(),bucket:()=>bucket()};
 
-const MODE_COLORS={quiz:'#2f6fe0',read:'#d9363e',balloon:'#e8590c',boss:'#7048e8',race:'#0b7285',memory:'#c2255c',speed:'#c77700',sort:'#2b8a3e',mole:'#8d5524',link:'#9c36b5',fish:'#1098ad'};
+const MODE_COLORS={quiz:'#2f6fe0',read:'#d9363e',balloon:'#e8590c',boss:'#7048e8',race:'#0b7285',memory:'#c2255c',speed:'#c77700',sort:'#2b8a3e',mole:'#8d5524',link:'#9c36b5',fish:'#1098ad',tiles:'#e64980',bucket:'#5f3dc4'};
 function drawModes(){
   $('modes').innerHTML=MODES.map(m=>`<button class="mode ${m[0]===mode?'on':''}" style="--mc:${MODE_COLORS[m[0]]||'#2f6fe0'}" onclick="selectMode('${m[0]}')"><b>${m[1]}</b>${m[2]}</button>`).join('');
   const cur=MODES.find(m=>m[0]===mode); $('modeNote').textContent=cur?cur[3]:'';
@@ -1496,8 +1505,9 @@ function updPenaltyNote(){
   const v=parseInt($('cfgStars').value,10)||0, on=$('cfgPenalty').checked;
   $('penaltyNote').textContent=on&&v>0?`Ví dụ: đúng được ${v} sao, sai bị trừ ${Math.ceil(v/2)} sao (số sao không bao giờ xuống dưới 0).`:'Đang tắt: trả lời sai không bị trừ sao.';
 }
-let shopDraft=[];
+let shopDraft=[], editingId=null;
 function openParentSettings(){
+  editingId=null;
   $('cfgStars').value=config.starsPerCorrect; $('cfgPenalty').checked=config.penalty!==false;
   $('cfgStars').oninput=$('cfgPenalty').onchange=updPenaltyNote; updPenaltyNote();
   $('statRows').innerHTML=SUBJ.map(s=>`<tr><td>${SUBJ_NAME[s]}</td><td>${user.stats[s].c}</td><td>${user.stats[s].w}</td></tr>`).join('');
@@ -1508,9 +1518,21 @@ function drawShopEdit(){
   const box=$('shopEdit'); box.innerHTML='';
   shopDraft.forEach(it=>{
     const r=document.createElement('div'); r.className='mini';
-    r.innerHTML=`<span>${esc(it.icon)} ${esc(it.title)} · ⭐ ${it.price}${it.isNew?' <em class="newtag">mới</em>':''}</span>`;
+    const eb=document.createElement('button'); eb.className='edit';
+    if(it.id===editingId){
+      r.innerHTML=`<span class="ed"><input maxlength="2" style="max-width:48px" aria-label="Biểu tượng"><input aria-label="Tên món quà"><input type="number" min="1" style="max-width:80px" aria-label="Số sao cần"></span>`;
+      const [ic,ti,pr]=r.querySelectorAll('input'); ic.value=it.icon; ti.value=it.title; pr.value=it.price;
+      // chỉ nhận giá trị hợp lệ, để trống/sai thì giữ giá trị cũ
+      ic.oninput=()=>{ it.icon=ic.value.trim()||'🎁'; };
+      ti.oninput=()=>{ if(ti.value.trim()) it.title=ti.value.trim(); };
+      pr.oninput=()=>{ const p=parseInt(pr.value,10); if(p>0) it.price=p; };
+      eb.textContent='Xong'; eb.onclick=()=>{ editingId=null; drawShopEdit(); };
+    } else {
+      r.innerHTML=`<span>${esc(it.icon)} ${esc(it.title)} · ⭐ ${it.price}${it.isNew?' <em class="newtag">mới</em>':''}</span>`;
+      eb.textContent='Sửa'; eb.onclick=()=>{ editingId=it.id; drawShopEdit(); };
+    }
     const b=document.createElement('button'); b.textContent='Xóa'; b.onclick=()=>{ shopDraft=shopDraft.filter(x=>x.id!==it.id); drawShopEdit(); };
-    r.appendChild(b); box.appendChild(r);
+    r.append(eb,b); box.appendChild(r);
   });
   const n=shopDraft.filter(x=>x.isNew).length;
   $('draftNote').textContent=n?`Đã thêm ${n} quà mới. Thêm tiếp hoặc bấm "Lưu tất cả" để lưu một lần.`:'';
@@ -1666,6 +1688,71 @@ function fishWave(){
     };
     pond.appendChild(f);
   });
+}
+
+/* =====================================================================
+   TRÒ 11: LẬT TRANH BÍ MẬT (mỗi câu đúng mở một ô)
+   ===================================================================== */
+const PICTURES=[['🦁','Sư tử'],['🚀','Tên lửa'],['🐘','Con voi'],['🌈','Cầu vồng'],['🐬','Cá heo'],['🏰','Lâu đài'],['🦄','Ngựa một sừng'],['🚒','Xe cứu hỏa']];
+function tiles(){
+  const pic=pick(PICTURES); G.st={pic,open:0,order:shuffle([0,1,2,3,4,5,6,7,8])};
+  $('game').innerHTML=`<div class="hud"><span id="tp"></span></div><div class="tpic" id="tpic"><em>${pic[0]}</em>${'<i>?</i>'.repeat(9)}</div><div id="qarea"></div>`;
+  $('tp').textContent='Trả lời đúng để mở tranh: 0/9'; tilesNext();
+}
+function tilesNext(){
+  G.lock=false; G.q=nextQ();
+  $('qarea').innerHTML=qHTML(G.q)+'<div class="opts" id="opts"></div>';
+  buildOpts($('opts'),G.q,tilesPick);
+}
+function tilesPick(o,b){
+  if(G.lock) return; G.lock=true;
+  const st=G.st, ok=o===G.q.a; reveal($('opts'),G.q,b,o); judge(ok,G.q,{reveal:true});
+  if(!ok) return later(tilesNext,1700);
+  $('tpic').children[st.order[st.open++]+1].classList.add('open'); $('tp').textContent=`Trả lời đúng để mở tranh: ${st.open}/9`;
+  if(st.open<9) return later(tilesNext,900);
+  const bonus=config.starsPerCorrect*2; addStars(bonus); sfx.win();
+  later(()=>dialog({icon:st.pic[0],title:'Đó là '+st.pic[1]+'!',text:`Bé đã mở hết bức tranh. Thưởng thêm +${bonus} ⭐`,buttons:[{label:'Tranh mới',cls:'primary',fn:tiles}]}),700);
+}
+
+/* =====================================================================
+   TRÒ 12: PHÂN LOẠI (xếp từng thẻ vào đúng nhóm)
+   ===================================================================== */
+const SORTSETS={
+  vietnamese:{c:['Con vật','Đồ vật'],items:[['con mèo',0],['con chó',0],['con gà',0],['con voi',0],['con cá',0],['con ếch',0],['cái bàn',1],['cái ghế',1],['quyển vở',1],['cái bút',1],['cái nón',1],['cái cốc',1]]},
+  english:{c:['Animal','Fruit'],items:[['cat',0],['dog',0],['bird',0],['fish',0],['lion',0],['monkey',0],['apple',1],['banana',1],['orange',1],['mango',1],['grape',1],['lemon',1]]}
+};
+function bucketItem(sj){
+  if(sj==='math'){ const n=rnd(1,[0,20,100,1000][grade]); return {c:['Số chẵn','Số lẻ'],t:String(n),a:n%2}; }
+  const s=SORTSETS[sj], it=pick(s.items); return {c:s.c,t:it[0],a:it[1],say:sj==='english'};
+}
+function bucket(){
+  G.st={i:0,ok:0,total:10,last:''};
+  $('game').innerHTML=`<div class="progress"><div id="pbar"></div></div><div class="hud"><span id="qno"></span></div><div id="qarea"></div><div class="fb" id="qfb"></div>`;
+  bucketNext();
+}
+function bucketNext(){
+  const st=G.st; if(st.i>=st.total) return bucketEnd();
+  G.lock=false; const sj=nextSub(); let q; do q=bucketItem(sj); while(q.t===st.last); st.last=q.t; G.curSub=sj;
+  $('qno').textContent=`Thẻ ${st.i+1}/${st.total}`; $('pbar').style.width=(st.i/st.total*100)+'%';
+  $('qarea').innerHTML=`<div class="qbox"><div class="q-sub">Thẻ này thuộc nhóm nào?</div><div class="q-main">${esc(q.t)}</div></div><div class="opts" id="opts"></div>`;
+  $('qfb').textContent=''; $('qfb').className='fb';
+  buildOpts($('opts'),{opts:q.c},(o,b)=>bucketPick(q,o,b));
+  if(q.say) speakParts([{t:q.t,lang:'en-US'}],{force:true});
+}
+function bucketPick(q,o,b){
+  if(G.lock) return; G.lock=true;
+  const st=G.st, ok=o===q.c[q.a]; st.i++; if(ok) st.ok++;
+  reveal($('opts'),{a:q.c[q.a]},b,o);
+  $('qfb').textContent=judge(ok,{subj:G.curSub,a:q.c[q.a]},{reveal:true,inline:true}); $('qfb').className='fb '+(ok?'good':'bad');
+  later(bucketNext,ok?1000:1800);
+}
+function bucketEnd(){
+  const st=G.st, c=config.starsPerCorrect, bonus=st.ok===st.total?c*3:(st.ok>=7?c:0);
+  if(bonus){ addStars(bonus); sfx.win(); }
+  $('game').innerHTML=`<div class="result"><div class="stamp">${st.ok}/${st.total}</div>
+    <h3>${st.ok===st.total?'Xếp đúng hết!':st.ok>=7?'Giỏi lắm!':'Cố gắng thêm nhé!'}</h3>
+    <p>${bonus?`Thưởng thêm +${bonus} ⭐`:'Xếp đúng từ 7 thẻ để nhận thưởng thêm.'}</p>
+    <button class="btn primary big" onclick="startMode()">Chơi tiếp</button></div>`;
 }
 
 /* =====================================================================
